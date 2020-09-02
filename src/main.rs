@@ -1,12 +1,28 @@
-use std::fs;
-use std::io::copy;
-use std::path::Path;
+use std::{fs, env, io::copy};
+use std::path::{Path, PathBuf};
 use zip::write::{ZipWriter, FileOptions};
 use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
 
 fn main() {
+    let mut check_old_versions = true;
+    let mut next_path = false;
+    let mut alternative_path = String::new() ;
+
+    let mut args: Vec<String> = env::args().collect();
+    args.remove(0);
+
+    for arg in args {
+        if next_path {
+            alternative_path = arg;
+        } else if arg == String::from("--install-dir") {
+            next_path = true;
+        } else if arg == String::from("--no-clean") {
+            check_old_versions = false;
+        }
+    }
+
     // Open info.json and parse it
     let mut info_file = fs::File::open("info.json").unwrap();
     let info: serde_json::Value = serde_json::from_reader(&mut info_file).unwrap();
@@ -15,16 +31,18 @@ fn main() {
     let mod_name = info["name"].as_str().unwrap();
     let mod_version = info["version"].as_str().unwrap();
     
-    // Check if any version of the mod already installed/exists.
-    let mod_glob_str = format!("{}/.factorio/mods/{}_*[0-9].*[0-9].*[0-9].zip", dirs::home_dir().unwrap().to_str().unwrap(), mod_name);
-    let mod_glob = glob::glob(&mod_glob_str).unwrap().into_iter();
+    if check_old_versions {
+        // Check if any version of the mod already installed/exists.
+        let mod_glob_str = format!("{}/.factorio/mods/{}_*[0-9].*[0-9].*[0-9].zip", dirs::home_dir().unwrap().to_str().unwrap(), mod_name);
+        let mod_glob = glob::glob(&mod_glob_str).unwrap().into_iter();
 
-    // Delete if exists
-    for entry in mod_glob {
-        let  entry = entry.unwrap();
-        println!("Removing {}", entry.to_str().unwrap());
-        if entry.is_file() {
-            fs::remove_file(&entry).unwrap();
+        // Delete if exists
+        for entry in mod_glob {
+            let  entry = entry.unwrap();
+            println!("Removing {}", entry.to_str().unwrap());
+            if entry.is_file() {
+                fs::remove_file(&entry).unwrap();
+            }
         }
     }
 
@@ -37,9 +55,14 @@ fn main() {
 
     // Mod file path
     //let zip_file_path = PathBuf::from(&zip_file_name);
-    let mut zip_file_path = dirs::home_dir().unwrap();
-    zip_file_path.push(".factorio");
-    zip_file_path.push("mods");
+    let mut zip_file_path: PathBuf;
+    if alternative_path.is_empty() {
+        zip_file_path = dirs::home_dir().unwrap();
+        zip_file_path.push(".factorio");
+        zip_file_path.push("mods");
+    } else {
+        zip_file_path = PathBuf::from(alternative_path);
+    }
     zip_file_path.push(&zip_file_name);
 
     // Delete existing file
