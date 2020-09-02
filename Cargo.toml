@@ -1,0 +1,14 @@
+[package]
+name = "rfmp"
+version = "0.1.0"
+authors = ["JohnTheCoolingFan <ivan8215145640@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde_json = "1.0"
+zip = "0.5"
+walkdir = "2"
+dirs = "3"
+glob = "0.3.0"
