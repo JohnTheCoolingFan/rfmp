@@ -14,5 +14,6 @@ Currently (0.1.0) works linux-only.
 
 ### TODO:
 - Command-line args
+- Error handling
 - Windows compatibility
 - *MacOs?*
