@@ -6,6 +6,7 @@ use dirs;
 use glob;
 
 fn main() {
+    // Flags for args
     let mut check_old_versions = true;
     let mut next_path = false;
     let mut alternative_path = String::new() ;
@@ -13,6 +14,7 @@ fn main() {
     let mut args: Vec<String> = env::args().collect();
     args.remove(0);
 
+    // User input, no error checking. This will probably cause a lot of trouble
     for arg in args {
         if next_path {
             alternative_path = arg;
