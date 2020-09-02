@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "rfmp"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dirs",
  "glob",
