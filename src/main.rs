@@ -28,7 +28,7 @@ fn main() {
 
     // Open info.json and parse it
     let info_file = fs::File::open("info.json").expect("Error opening info.json");
-    let info: Value = from_reader(&info_file).expect("Error parsing info.json");
+    let info: Value = from_reader(info_file).expect("Error parsing info.json");
 
     // Get mod name/id and version
     let mod_name = info["name"].as_str().unwrap();
@@ -73,7 +73,7 @@ fn main() {
         println!("{} exists, removing.", zip_file_path.to_str().unwrap());
         if zip_file_path.is_file() {
             fs::remove_file(&zip_file_path).unwrap();
-        } else if zip_file_path.is_dir() {
+        } else if zip_file_path.is_dir() { // Is this even possible?
             fs::remove_dir(&zip_file_path).unwrap();
         }
     }
