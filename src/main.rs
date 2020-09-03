@@ -32,7 +32,6 @@ fn main() {
         Ok(file) => file,
         Err(error) => panic!("Failed to open info.json: {:?}", error)
     };
-
     let info = from_reader(&info_file);
     let info: Value = match info {
         Ok(value) => value,
