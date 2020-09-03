@@ -27,16 +27,8 @@ fn main() {
     }
 
     // Open info.json and parse it
-    let info_file = fs::File::open("info.json");
-    let info_file = match info_file {
-        Ok(file) => file,
-        Err(error) => panic!("Failed to open info.json: {:?}", error)
-    };
-    let info = from_reader(&info_file);
-    let info: Value = match info {
-        Ok(value) => value,
-        Err(error) => panic!("Error parsing info.json: {:?}", error)
-    };
+    let info_file = fs::File::open("info.json").expect("Error opening info.json");
+    let info: Value = from_reader(&info_file).expect("Error parsing info.json");
 
     // Get mod name/id and version
     let mod_name = info["name"].as_str().unwrap();
