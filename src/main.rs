@@ -9,7 +9,7 @@ fn main() {
     // Flags for args
     let mut check_old_versions = true;
     let mut next_path = false;
-    let mut alternative_path = String::new() ;
+    let mut alternative_path = String::new();
 
     let mut args: Vec<String> = env::args().collect();
     args.remove(0);
@@ -26,8 +26,8 @@ fn main() {
     }
 
     // Open info.json and parse it
-    let mut info_file = fs::File::open("info.json").unwrap();
-    let info: serde_json::Value = serde_json::from_reader(&mut info_file).unwrap();
+    let info_file = fs::File::open("info.json").unwrap();
+    let info: serde_json::Value = serde_json::from_reader(&info_file).unwrap();
 
     // Get mod name/id and version
     let mod_name = info["name"].as_str().unwrap();
