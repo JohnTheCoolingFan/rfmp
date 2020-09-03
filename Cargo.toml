@@ -12,3 +12,6 @@ zip = "0.5"
 walkdir = "2"
 dirs = "3"
 glob = "0.3.0"
+
+[profile.release]
+panic = 'abort'
