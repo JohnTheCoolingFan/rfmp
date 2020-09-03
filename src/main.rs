@@ -1,6 +1,7 @@
 use std::{fs, env, io::copy};
 use std::path::{Path, PathBuf};
 use zip::write::{ZipWriter, FileOptions};
+use serde_json::{from_reader, Error, Value};
 use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
@@ -31,7 +32,12 @@ fn main() {
         Ok(file) => file,
         Err(error) => panic!("Failed to open info.json: {:?}", error)
     };
-    let info: serde_json::Value = serde_json::from_reader(&info_file).unwrap();
+
+    let info = from_reader(&info_file);
+    let info: Value = match info {
+        Ok(value) => value,
+        Err(error) => panic!("Error parsing info.json: {:?}", error)
+    };
 
     // Get mod name/id and version
     let mod_name = info["name"].as_str().unwrap();
