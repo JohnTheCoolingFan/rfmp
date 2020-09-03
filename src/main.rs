@@ -10,15 +10,20 @@ fn main() {
     // Flags for args
     let mut check_old_versions = true;
     let mut next_path = false;
-    let mut alternative_path = String::new();
+    let mut zip_file_path: PathBuf;
 
     let mut args: Vec<String> = env::args().collect();
     args.remove(0);
 
+    // Mod file path
+    zip_file_path = dirs::home_dir().unwrap();
+    zip_file_path.push(".factorio");
+    zip_file_path.push("mods");
+
     // User input, no error checking. This will probably cause a lot of trouble
     for arg in args {
         if next_path {
-            alternative_path = arg;
+            zip_file_path = PathBuf::from(arg);
         } else if arg == String::from("--install-dir") {
             next_path = true;
         } else if arg == String::from("--no-clean") {
@@ -51,22 +56,11 @@ fn main() {
 
     // Mod file name
     let zip_file_name = format!("{}_{}.zip", mod_name, mod_version);
+    zip_file_path.push(&zip_file_name);
 
     // Walkdir iter, filtered
     let walkdir = WalkDir::new(".");
     let it = walkdir.into_iter().filter_entry(|e| !is_hidden(e, &zip_file_name));
-
-    // Mod file path
-    //let zip_file_path = PathBuf::from(&zip_file_name);
-    let mut zip_file_path: PathBuf;
-    if alternative_path.is_empty() {
-        zip_file_path = dirs::home_dir().unwrap();
-        zip_file_path.push(".factorio");
-        zip_file_path.push("mods");
-    } else {
-        zip_file_path = PathBuf::from(alternative_path);
-    }
-    zip_file_path.push(&zip_file_name);
 
     // Delete existing file
     if zip_file_path.exists() {
