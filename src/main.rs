@@ -26,7 +26,11 @@ fn main() {
     }
 
     // Open info.json and parse it
-    let info_file = fs::File::open("info.json").unwrap();
+    let info_file = fs::File::open("info.json");
+    let info_file = match info_file {
+        Ok(file) => file,
+        Err(error) => panic!("Failed to open info.json: {:?}", error)
+    };
     let info: serde_json::Value = serde_json::from_reader(&info_file).unwrap();
 
     // Get mod name/id and version
