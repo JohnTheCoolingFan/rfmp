@@ -44,7 +44,7 @@ fn main() {
     
     if check_old_versions {
         // Check if any version of the mod already installed/exists.
-        let mod_glob_str = format!("{}/.factorio/mods/{}_*[0-9].*[0-9].*[0-9].zip", dirs::home_dir().unwrap().to_str().unwrap(), mod_name);
+        let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.as_os_str().to_str().unwrap(), mod_name);
         let mod_glob = glob::glob(&mod_glob_str).unwrap().into_iter();
 
         // Delete if exists
