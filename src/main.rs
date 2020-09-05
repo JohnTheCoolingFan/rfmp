@@ -20,7 +20,6 @@ fn main() {
     zip_file_path.push(".factorio");
     zip_file_path.push("mods");
 
-    // User input, no error checking. This will probably cause a lot of trouble
     for arg in args {
         if next_path {
             zip_file_path = PathBuf::from(arg);
@@ -29,6 +28,10 @@ fn main() {
         } else if arg == String::from("--no-clean") {
             check_old_versions = false;
         }
+    }
+
+    if !zip_file_path.exists() {
+        panic!("Error: {:?} doesn't exist", zip_file_path);
     }
 
     // Open info.json and parse it
