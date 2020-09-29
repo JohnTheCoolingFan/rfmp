@@ -23,6 +23,7 @@ fn main() {
     for arg in args {
         if next_path {
             zip_file_path = PathBuf::from(arg);
+            next_path = false;
         } else if arg == String::from("--install-dir") {
             next_path = true;
         } else if arg == String::from("--no-clean") {
