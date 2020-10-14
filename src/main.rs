@@ -13,6 +13,13 @@ fn main() {
     let mut zip_file_path: PathBuf;
 
     let mut args: Vec<String> = env::args().collect();
+
+    let help_text = format!("Usage: {} [--install-dir PATH] [--no-clean]\n    \
+                            No arguments: Pack mod from mod files in current path (pwd) and install into default mod path\n    \
+                            --install-dir PATH: Install mod to PATH instead of default one.\n      \
+                            Default path is (on linux) ~/.factorio/mods\n    \
+                            --no-clean: Do not search for other versions of the mod and do not remove them.", args[0]);
+
     args.remove(0);
 
     // Mod file path
@@ -24,6 +31,9 @@ fn main() {
         if next_path {
             zip_file_path = PathBuf::from(arg);
             next_path = false;
+        } else if arg == String::from("--help") {
+            println!("{}", help_text);
+            std::process::exit(0);
         } else if arg == String::from("--install-dir") {
             next_path = true;
         } else if arg == String::from("--no-clean") {
