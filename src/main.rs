@@ -18,7 +18,8 @@ fn main() {
                             No arguments: Pack mod from mod files in current path (pwd) and install into default mod path.\n\n    \
                             --install-dir PATH: Install mod to PATH instead of default one.\n      \
                             Default path is (on linux) ~/.factorio/mods\n\n    \
-                            --no-clean: Do not search for other versions of the mod and do not remove them.", args[0]);
+                            --no-clean: Do not search for other versions of the mod and do not remove them.\n\n    \
+                            --help: Show this message.", args[0]);
 
     args.remove(0);
 
@@ -27,6 +28,7 @@ fn main() {
     zip_file_path.push(".factorio");
     zip_file_path.push("mods");
 
+    // This requires more reliability, especially user input checking.
     for arg in args {
         if next_path {
             zip_file_path = PathBuf::from(arg);
