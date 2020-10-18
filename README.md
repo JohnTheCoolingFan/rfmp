@@ -1,5 +1,6 @@
 # Rust factorio Mod Packer
 
+Idea behind this project was to create a compiled and fast replacement to my shell script that packed factorio mods (very useful in my Factorio mod development pipeline).
 This program packs all files in current direcory (excluding unix-style hidden directories to ignore git stuff) into a properly-formatted mod and puts it into mods folder (`$HOME/.factorio/mods` on linux).
 Current builds (0.1.3) are linux-only, but I managed to build it on windows.
 
