@@ -6,6 +6,16 @@ use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
 
+fn print_help(executable_name: &String, exit_code: i32) {
+    println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
+                            No arguments: Pack mod from mod files in current path (pwd) and install into default mod path.\n\n    \
+                            --install-dir PATH: Install mod to PATH instead of default one.\n      \
+                            Default path is (on linux) ~/.factorio/mods\n\n    \
+                            --no-clean: Do not search for other versions of the mod and do not remove them.\n\n    \
+                            --help: Show this message.", executable_name);
+    std::process::exit(exit_code);
+}
+
 fn main() {
     // Flags for args
     let mut check_old_versions = true;
@@ -14,21 +24,13 @@ fn main() {
 
     let mut args: Vec<String> = env::args().collect();
 
-    let help_text = format!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
-                            No arguments: Pack mod from mod files in current path (pwd) and install into default mod path.\n\n    \
-                            --install-dir PATH: Install mod to PATH instead of default one.\n      \
-                            Default path is (on linux) ~/.factorio/mods\n\n    \
-                            --no-clean: Do not search for other versions of the mod and do not remove them.\n\n    \
-                            --help: Show this message.", args[0]);
-
-    args.remove(0);
-
     // Mod file path
     zip_file_path = dirs::home_dir().unwrap();
     zip_file_path.push(".factorio");
     zip_file_path.push("mods");
 
     // This requires more reliability, especially user input checking.
+    /*
     for arg in args {
         if next_path {
             zip_file_path = PathBuf::from(arg);
@@ -40,6 +42,21 @@ fn main() {
             next_path = true;
         } else if arg == String::from("--no-clean") {
             check_old_versions = false;
+        }
+    }*/
+
+    let executable_name = args.remove(0);
+    for arg in args {
+        if next_path {
+            zip_file_path = PathBuf::from(arg);
+            next_path = false;
+        } else {
+            match arg.as_str() {
+                "--help" => print_help(&executable_name, 0),
+                "--install-dir" => next_path = true,
+                "--no-clean" => check_old_versions = false,
+                _ => print_help(&executable_name, 1),
+            }
         }
     }
 
