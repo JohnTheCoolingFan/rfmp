@@ -32,6 +32,7 @@ fn main() {
     // This requires more reliability, especially user input checking.
     let executable_name = args.remove(0);
     for arg in args {
+        // This part looks especially jank
         if next_path {
             zip_file_path = PathBuf::from(arg);
             next_path = false;
