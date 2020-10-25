@@ -25,9 +25,18 @@ fn main() {
     let mut args: Vec<String> = env::args().collect();
 
     // Mod file path
-    zip_file_path = dirs::home_dir().unwrap();
-    zip_file_path.push(".factorio");
-    zip_file_path.push("mods");
+    #[cfg(target_os="linux")]
+    {
+        zip_file_path = dirs::home_dir().unwrap();
+        zip_file_path.push(".factorio");
+        zip_file_path.push("mods");
+    }
+    #[cfg(target_os="windows")]
+    {
+        zip_file_path = dirs::data_dir().unwrap();
+        zip_file_path.push("Factorio");
+        zip_file_path.push("mods");
+    }
 
     // This requires more reliability, especially user input checking.
     let executable_name = args.remove(0);
