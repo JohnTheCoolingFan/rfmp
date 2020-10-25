@@ -30,21 +30,6 @@ fn main() {
     zip_file_path.push("mods");
 
     // This requires more reliability, especially user input checking.
-    /*
-    for arg in args {
-        if next_path {
-            zip_file_path = PathBuf::from(arg);
-            next_path = false;
-        } else if arg == String::from("--help") {
-            println!("{}", help_text);
-            std::process::exit(0);
-        } else if arg == String::from("--install-dir") {
-            next_path = true;
-        } else if arg == String::from("--no-clean") {
-            check_old_versions = false;
-        }
-    }*/
-
     let executable_name = args.remove(0);
     for arg in args {
         if next_path {
