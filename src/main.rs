@@ -22,8 +22,6 @@ fn main() {
     let mut next_path = false;
     let mut zip_file_path: PathBuf;
 
-    let mut args: Vec<String> = env::args().collect();
-
     // Mod file path
     #[cfg(target_os="linux")]
     {
@@ -38,19 +36,23 @@ fn main() {
         zip_file_path.push("mods");
     }
 
-    // This requires more reliability, especially user input checking.
-    let executable_name = args.remove(0);
-    for arg in args {
-        // This part looks especially jank
-        if next_path {
-            zip_file_path = PathBuf::from(arg);
-            next_path = false;
-        } else {
-            match arg.as_str() {
-                "--help" => print_help(&executable_name, 0),
-                "--install-dir" => next_path = true,
-                "--no-clean" => check_old_versions = false,
-                _ => print_help(&executable_name, 1),
+    let mut args: Vec<String> = env::args().collect();
+
+    if args.len() != 1 {
+        // This requires more reliability, especially user input checking.
+        let executable_name = args.remove(0);
+        for arg in args {
+            // This part looks especially jank
+            if next_path {
+                zip_file_path = PathBuf::from(arg);
+                next_path = false;
+            } else {
+                match arg.as_str() {
+                    "--help" => print_help(&executable_name, 0),
+                    "--install-dir" => next_path = true,
+                    "--no-clean" => check_old_versions = false,
+                    _ => print_help(&executable_name, 1),
+                }
             }
         }
     }
