@@ -14,3 +14,6 @@ All versions are available on GitLab releases page or [from my friend's server](
         - `data.lua`
         - `control.lua`
         - etc
+
+### TODO
+  - Rewrite to zip-rs 0.5.8 (latest). Currently 0.5.6
