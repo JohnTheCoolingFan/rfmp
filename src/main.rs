@@ -76,10 +76,13 @@ fn main() {
 
         // Delete if exists
         for entry in mod_glob {
-            let  entry = entry.unwrap();
-            println!("Removing {}", entry.to_str().unwrap());
+            let entry = entry.unwrap();
+            let entry_name = entry.to_str().unwrap();
+            println!("Removing {}", entry_name);
             if entry.is_file() {
                 fs::remove_file(&entry).unwrap();
+            } else {
+                println!("Failed to remove {}: not a file", entry_name);
             }
         }
     }
