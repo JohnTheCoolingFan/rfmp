@@ -150,5 +150,5 @@ fn is_hidden(entry: &DirEntry, zip_file_name: &String) -> bool {
     let entry_file_name = entry.file_name().to_str().unwrap();
     entry_file_name == zip_file_name ||
         (entry_file_name != "." && entry_file_name.starts_with(".")) ||
-        entry_file_name != "build"
+        entry_file_name == "build"
 }
