@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 serde_json = "1.0"
-zip = "0.5"
+zip = { version = "0.5", features = [ "deflate", "deflate-zlib" ], default-features = false }
 walkdir = "2"
 dirs = "3"
 glob = "0.3.0"
