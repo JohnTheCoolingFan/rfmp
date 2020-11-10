@@ -76,11 +76,11 @@ fn main() {
     
     // Check for other versions
     if check_old_versions {
-        // Check if any version of the mod already installed/exists.
+        // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.as_os_str().to_str().unwrap(), mod_name);
         let mod_glob = glob::glob(&mod_glob_str).unwrap().into_iter();
 
-        // Delete if exists
+        // Delete if any other versions found
         for entry in mod_glob {
             let entry = entry.unwrap();
             let entry_name = entry.to_str().unwrap();
@@ -101,7 +101,7 @@ fn main() {
     let walkdir = WalkDir::new(".");
     let it = walkdir.into_iter().filter_entry(|e| !is_hidden(e, &zip_file_name));
 
-    // Delete existing file
+    // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
     if zip_file_path.exists() {
         println!("{} exists, removing.", zip_file_path.to_str().unwrap());
         if zip_file_path.is_file() {
@@ -112,10 +112,11 @@ fn main() {
     }
 
     // Create mod file
-    let zip_file = fs::File::create(zip_file_path).unwrap();
+    let zip_file = fs::File::create(zip_file_path).expect("Failed to create mod file");
 
     // Archive options. Deflated is best combination of speed and compression (for zip)
     // It would be cool if Factorio allowed other compression formats, like zstd
+    // zip-rs doesn't seem to be able to compress with deflated multithreaded, unlike 7zip
     let zip_options = FileOptions::default();
 
     // Create writer
