@@ -1,6 +1,6 @@
 [package]
 name = "rfmp"
-version = "0.1.7"
+version = "0.1.6"
 authors = ["JohnTheCoolingFan <ivan8215145640@gmail.com>"]
 edition = "2018"
 
