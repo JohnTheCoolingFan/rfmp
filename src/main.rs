@@ -25,19 +25,25 @@ fn main() {
     // Mod file path
     #[cfg(target_os="linux")]
     {
-        zip_file_path = dirs::home_dir().unwrap();
-        zip_file_path.push(".factorio");
-        zip_file_path.push("mods");
+        zip_file_path = dirs::home_dir().unwrap().join(PathBuf::from(".factorio/mods"));
+        //zip_file_path.push(".factorio");
+        //zip_file_path.push("mods");
     }
     #[cfg(target_os="windows")]
     {
-        zip_file_path = dirs::data_dir().unwrap();
-        zip_file_path.push("Factorio");
-        zip_file_path.push("mods");
+        zip_file_path = dirs::data_dir().unwrap().join(PathBuf::from(".factorio/mods"));
+        //zip_file_path.push("Factorio");
+        //zip_file_path.push("mods");
     }
 
+    if !zip_file_path.exists() {
+        panic!("Error: {:?} doesn't exist", zip_file_path);
+    }
+
+    // Collect args
     let mut args: Vec<String> = env::args().collect();
 
+    // Parse args
     if args.len() != 1 {
         // This requires more reliability, especially user input checking.
         let executable_name = args.remove(0);
@@ -45,6 +51,9 @@ fn main() {
             // This part looks especially jank
             if next_path {
                 zip_file_path = PathBuf::from(arg);
+                if !zip_file_path.exists() {
+                    panic!("Error: {:?} doesn't exist", zip_file_path);
+                }
                 next_path = false;
             } else {
                 match arg.as_str() {
@@ -57,10 +66,6 @@ fn main() {
         }
     }
 
-    if !zip_file_path.exists() {
-        panic!("Error: {:?} doesn't exist", zip_file_path);
-    }
-
     // Open info.json and parse it
     let info_file = fs::File::open("info.json").expect("Error opening info.json");
     let info: Value = from_reader(info_file).expect("Error parsing info.json");
@@ -69,6 +74,7 @@ fn main() {
     let mod_name = info["name"].as_str().unwrap();
     let mod_version = info["version"].as_str().unwrap();
     
+    // Check for other versions
     if check_old_versions {
         // Check if any version of the mod already installed/exists.
         let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.as_os_str().to_str().unwrap(), mod_name);
