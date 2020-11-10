@@ -1,5 +1,6 @@
 use std::{fs, env, io::copy};
 use std::path::{Path, PathBuf};
+use zip::CompressionMethod;
 use zip::write::{ZipWriter, FileOptions};
 use serde_json::{from_reader, Value};
 use walkdir::{DirEntry, WalkDir};
@@ -117,7 +118,7 @@ fn main() {
     // Archive options. Deflated is best combination of speed and compression (for zip)
     // It would be cool if Factorio allowed other compression formats, like zstd
     // zip-rs doesn't seem to be able to compress with deflated multithreaded, unlike 7zip
-    let zip_options = FileOptions::default();
+    let zip_options = FileOptions::default().compression_method(CompressionMethod::Deflated);
 
     // Create writer
     let mut zipwriter = ZipWriter::new(zip_file);  
