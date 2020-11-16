@@ -32,7 +32,7 @@ fn main() {
     }
     #[cfg(target_os="windows")]
     {
-        zip_file_path = dirs::data_dir().unwrap().join(PathBuf::from(".factorio/mods"));
+        zip_file_path = dirs::data_dir().unwrap().join(PathBuf::from("Factorio/mods"));
         //zip_file_path.push("Factorio");
         //zip_file_path.push("mods");
     }
