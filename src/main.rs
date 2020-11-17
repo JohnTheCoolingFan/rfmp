@@ -42,12 +42,12 @@ fn main() {
     }
 
     // Collect args
-    let mut args: Vec<String> = env::args().collect();
+    let mut args = env::args();
 
     // Parse args
-    if args.len() != 1 {
+    if args.len() > 1 {
         // This requires more reliability, especially user input checking.
-        let executable_name = args.remove(0);
+        let executable_name = args.next().unwrap();
         for arg in args {
             // This part looks especially jank
             if next_path {
