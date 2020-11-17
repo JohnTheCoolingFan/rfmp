@@ -1,6 +1,6 @@
 use std::{fs, env, io::copy};
 use std::path::{Path, PathBuf};
-use std::time::{Instant};
+use std::time::Instant;
 use zip::CompressionMethod;
 use zip::write::{ZipWriter, FileOptions};
 use serde_json::{from_reader, Value};
