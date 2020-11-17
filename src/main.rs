@@ -1,5 +1,6 @@
 use std::{fs, env, io::copy};
 use std::path::{Path, PathBuf};
+use std::time::{Instant};
 use zip::CompressionMethod;
 use zip::write::{ZipWriter, FileOptions};
 use serde_json::{from_reader, Value};
@@ -21,6 +22,7 @@ fn main() {
     // Flags for args
     let mut check_old_versions = true;
     let mut next_path = false;
+    let mut measure_time = false;
     let mut zip_file_path: PathBuf;
 
     // Mod file path
@@ -61,6 +63,7 @@ fn main() {
                     "--help" => print_help(&executable_name, 0),
                     "--install-dir" => next_path = true,
                     "--no-clean" => check_old_versions = false,
+                    "--measure-time" => measure_time = true,
                     _ => print_help(&executable_name, 1),
                 }
             }
@@ -123,6 +126,8 @@ fn main() {
     // Create writer
     let mut zipwriter = ZipWriter::new(zip_file);  
 
+    let time_zip_measure = Instant::now();
+
     // Let the zipping begin!
     for entry in it {
         let entry = entry.unwrap();
@@ -144,6 +149,10 @@ fn main() {
 
     // Finish writing
     zipwriter.finish().unwrap();
+
+    if measure_time {
+        println!("{}", time_zip_measure.elapsed().as_secs_f64());
+    }
 }
 
 // Function to filter all files we don't want to add to archive
