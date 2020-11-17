@@ -14,7 +14,8 @@ fn print_help(executable_name: &String, exit_code: i32) {
                             --install-dir PATH: Install mod to PATH instead of default one.\n      \
                             Default path is (on linux) ~/.factorio/mods\n\n    \
                             --no-clean: Do not search for other versions of the mod and do not remove them.\n\n    \
-                            --help: Show this message.", executable_name);
+                            --help: Show this message.\n\n    \
+                            --measure-time: measure duration of compression.", executable_name);
     std::process::exit(exit_code);
 }
 
