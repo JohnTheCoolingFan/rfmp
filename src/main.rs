@@ -130,7 +130,6 @@ fn main() {
     let time_zip_measure = Instant::now();
 
     // Let the zipping begin!
-    
     let zipping_prefix_str = format!("{}_{}", mod_name, mod_version);
     let zipping_prefix = Path::new(&zipping_prefix_str);
 
