@@ -1,12 +1,20 @@
-use std::{fs, env, io::copy};
+use std::{fs, env, io::{copy, Cursor, Read, Seek}};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use std::thread;
+use std::sync::mpsc;
 use zip::CompressionMethod;
 use zip::write::{ZipWriter, FileOptions};
+use zip::read::ZipArchive;
 use serde_json::{from_reader, Value};
 use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
+
+struct ZipThreadResult<T: Read + Seek> {
+    path: String,
+    file: ZipArchive<T>,
+}
 
 fn print_help(executable_name: &String, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
@@ -133,23 +141,63 @@ fn main() {
     let zipping_prefix_str = format!("{}_{}", mod_name, mod_version);
     let zipping_prefix = Path::new(&zipping_prefix_str);
 
+    let mut handles = Vec::new();
+    let (tx, rx) = mpsc::channel();
+
     for entry in it {
         let entry = entry.unwrap();
-        let name = entry.path();
+        let name = entry.into_path();
         name.strip_prefix(Path::new(".")).unwrap();
         let zipped_name = zipping_prefix.join(&name);
-        let zipped_name = zipped_name.to_str().unwrap();
+        let zipped_name = String::from(zipped_name.to_str().unwrap());
 
         if name.is_file() {
+            let subthread_tx = mpsc::Sender::clone(&tx);
+            let thread_handle = thread::spawn(move || {
+                let mut buf = Vec::new();
+                let mut file_in = fs::File::open(name).unwrap();
+                let mut zipwriter_th = ZipWriter::new(Cursor::new(&mut buf));
+
+                zipwriter_th.start_file(&zipped_name, FileOptions::default().compression_method(CompressionMethod::Deflated)).unwrap();
+
+                copy(&mut file_in, &mut zipwriter_th).unwrap();
+
+                zipwriter_th.finish().unwrap();
+                drop(zipwriter_th);
+
+                let zipreader_th = ZipArchive::new(Cursor::new(buf)).unwrap();
+                //let mut result_file = zipreader_th.by_index(0).unwrap();
+
+                let result_message = ZipThreadResult {
+                    path: zipped_name,
+                    file: zipreader_th,
+                };
+
+                subthread_tx.send(result_message).unwrap();
+            });
+
+            handles.push(thread_handle);
+
+            /*
             //println!("adding file {:?}", name);
             zipwriter.start_file(zipped_name, zip_options).unwrap();
             let mut f = fs::File::open(name).unwrap();
 
-            copy(&mut f, &mut zipwriter).unwrap();
+            copy(&mut f, &mut zipwriter).unwrap();*/
         } else if name.as_os_str().len() != 0 {
             //println!("adding dir  {:?}", name);
             zipwriter.add_directory(zipped_name, zip_options).unwrap();
         }
+
+    }
+
+    for handle in handles {
+        let mut recvd_file = rx.recv().unwrap();
+        zipwriter.start_file(recvd_file.path, FileOptions::default().compression_method(CompressionMethod::Deflated)).unwrap();
+        let raw_file = recvd_file.file.by_index_raw(0).unwrap();
+
+        zipwriter.raw_copy_file(raw_file).unwrap();
+        handle.join().unwrap();
     }
 
     // Finish writing
