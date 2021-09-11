@@ -134,17 +134,20 @@ fn main() {
         let entry = entry.unwrap();
         let name = entry.path();
         name.strip_prefix(Path::new(".")).unwrap();
-        let zipped_name = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name);
+        let zipped_name = {
+            let zip_path = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name);
+            String::from(zip_path.to_str().unwrap())
+        };
 
         if name.is_file() {
             //println!("adding file {:?}", name);
-            zipwriter.start_file_from_path(&zipped_name, zip_options).unwrap();
+            zipwriter.start_file(zipped_name, zip_options).unwrap();
             let mut f = fs::File::open(name).unwrap();
 
             copy(&mut f, &mut zipwriter).unwrap();
         } else if name.as_os_str().len() != 0 {
             //println!("adding dir  {:?}", name);
-            zipwriter.add_directory_from_path(&zipped_name, zip_options).unwrap();
+            zipwriter.add_directory(zipped_name, zip_options).unwrap();
         }
     }
 
