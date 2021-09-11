@@ -30,18 +30,10 @@ fn main() {
     #[cfg(target_os="linux")]
     {
         zip_file_path = dirs::home_dir().unwrap().join(PathBuf::from(".factorio/mods"));
-        //zip_file_path.push(".factorio");
-        //zip_file_path.push("mods");
     }
     #[cfg(target_os="windows")]
     {
         zip_file_path = dirs::data_dir().unwrap().join(PathBuf::from("Factorio/mods"));
-        //zip_file_path.push("Factorio");
-        //zip_file_path.push("mods");
-    }
-
-    if !zip_file_path.exists() {
-        panic!("Error: {:?} doesn't exist", zip_file_path);
     }
 
     // Collect args
@@ -55,9 +47,6 @@ fn main() {
             // This part looks especially jank
             if next_path {
                 zip_file_path = PathBuf::from(arg);
-                if !zip_file_path.exists() {
-                    panic!("Error: {:?} doesn't exist", zip_file_path);
-                }
                 next_path = false;
             } else {
                 match arg.as_str() {
@@ -69,6 +58,10 @@ fn main() {
                 }
             }
         }
+    }
+
+    if !zip_file_path.exists() {
+        panic!("Error: {:?} doesn't exist", zip_file_path);
     }
 
     // Open info.json and parse it
