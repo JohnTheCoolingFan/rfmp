@@ -123,6 +123,7 @@ fn main() {
     let time_zip_measure = Instant::now();
 
     // Let the zipping begin!
+    // FIXME: rfmp adds `.` dir in path, which breaks mod loading.
     for entry in it {
         let entry = entry.unwrap();
         let name = entry.path();
