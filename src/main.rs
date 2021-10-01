@@ -131,20 +131,17 @@ fn main() -> Result<(), Box<dyn Error>>{
     for entry in it {
         let entry = entry.unwrap();
         let name = entry.path();
-        //name.strip_prefix(Path::new(".")).unwrap();
-        println!("{:?}", name);
         let zip_path = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name.to_str().unwrap()[2..]);
         let zipped_name = zip_path.to_str().unwrap();
-        println!("{}", zipped_name);
 
         if name.is_file() {
-            println!("adding file {:?}", zipped_name);
+            //println!("adding file {:?}", zipped_name);
             zipwriter.start_file(zipped_name, zip_options)?;
             let mut f = fs::File::open(name)?;
 
             copy(&mut f, &mut zipwriter)?;
         } else if name.as_os_str().len() != 0 {
-            println!("adding dir  {:?}", zipped_name);
+            //println!("adding dir  {:?}", zipped_name);
             zipwriter.add_directory(zipped_name, zip_options)?;
         }
     }
