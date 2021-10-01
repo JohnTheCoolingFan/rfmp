@@ -104,6 +104,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     let mut it = walkdir.into_iter().filter_entry(|e| !is_hidden(e, &zip_file_name));
     it.next();
 
+    // As testing found out, removing the file beforehand speeds up the whole process
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
     if zip_file_path.exists() {
         println!("{} exists, removing.", zip_file_path.to_str().unwrap());
