@@ -1,14 +1,10 @@
-use std::{fs, env, io::copy};
-use std::path::{Path, PathBuf};
-use std::time::Instant;
-use std::error::Error;
-use zip::CompressionMethod;
-use zip::write::{ZipWriter, FileOptions};
-use serde_json::{from_reader, Value};
+use std::{fs, env, io::copy, path::{Path, PathBuf}, time::Instant, error::Error};
+use zip::{write::{ZipWriter, FileOptions}, CompressionMethod};
+use serde_json::from_reader;
+use serde::Deserialize;
 use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
-use serde::Deserialize;
 
 fn print_help(executable_name: &String, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
