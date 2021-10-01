@@ -1,12 +1,14 @@
 use std::{fs, env, io::copy};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
+use std::error::Error;
 use zip::CompressionMethod;
 use zip::write::{ZipWriter, FileOptions};
 use serde_json::{from_reader, Value};
 use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
+use serde::Deserialize;
 
 fn print_help(executable_name: &String, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
@@ -19,7 +21,13 @@ fn print_help(executable_name: &String, exit_code: i32) {
     std::process::exit(exit_code);
 }
 
-fn main() {
+#[derive(Deserialize)]
+struct InfoJson {
+    name: String,
+    version: String
+}
+
+fn main() -> Result<(), Box<dyn Error>>{
     // Flags for args
     let mut check_old_versions = true;
     let mut next_path = false;
@@ -65,26 +73,26 @@ fn main() {
     }
 
     // Open info.json and parse it
-    let info_file = fs::File::open("info.json").expect("Error opening info.json");
-    let info: Value = from_reader(info_file).expect("Error parsing info.json");
+    let info_file = fs::File::open("info.json")?;
+    let info_json: InfoJson = from_reader(info_file)?;
 
     // Get mod name/id and version
-    let mod_name = info["name"].as_str().unwrap();
-    let mod_version = info["version"].as_str().unwrap();
+    let mod_name = info_json.name;
+    let mod_version = info_json.version;
     
     // Check for other versions
     if check_old_versions {
         // Check if any version of the mod already installed/exist.
-        let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.as_os_str().to_str().unwrap(), mod_name);
-        let mod_glob = glob::glob(&mod_glob_str).unwrap().into_iter();
+        let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.to_str().unwrap(), mod_name);
+        let mod_glob = glob::glob(&mod_glob_str)?.into_iter();
 
         // Delete if any other versions found
         for entry in mod_glob {
-            let entry = entry.unwrap();
+            let entry = entry?;
             let entry_name = entry.to_str().unwrap();
             println!("Removing {}", entry_name);
             if entry.is_file() {
-                fs::remove_file(&entry).unwrap();
+                fs::remove_file(&entry)?;
             } else {
                 println!("Failed to remove {}: not a file", entry_name);
             }
@@ -97,20 +105,21 @@ fn main() {
 
     // Walkdir iter, filtered
     let walkdir = WalkDir::new(".");
-    let it = walkdir.into_iter().filter_entry(|e| !is_hidden(e, &zip_file_name));
+    let mut it = walkdir.into_iter().filter_entry(|e| !is_hidden(e, &zip_file_name));
+    it.next();
 
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
     if zip_file_path.exists() {
         println!("{} exists, removing.", zip_file_path.to_str().unwrap());
         if zip_file_path.is_file() {
-            fs::remove_file(&zip_file_path).unwrap();
+            fs::remove_file(&zip_file_path)?;
         } else if zip_file_path.is_dir() { // Is this even possible?
-            fs::remove_dir(&zip_file_path).unwrap();
+            fs::remove_dir(&zip_file_path)?;
         }
     }
 
     // Create mod file
-    let zip_file = fs::File::create(zip_file_path).expect("Failed to create mod file");
+    let zip_file = fs::File::create(zip_file_path)?;
 
     // Archive options. Deflated is best combination of speed and compression (for zip)
     // It would be cool if Factorio allowed other compression formats, like zstd
@@ -123,34 +132,35 @@ fn main() {
     let time_zip_measure = Instant::now();
 
     // Let the zipping begin!
-    // FIXME: rfmp adds `.` dir in path, which breaks mod loading.
     for entry in it {
         let entry = entry.unwrap();
         let name = entry.path();
-        name.strip_prefix(Path::new(".")).unwrap();
-        let zipped_name = {
-            let zip_path = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name);
-            String::from(zip_path.to_str().unwrap())
-        };
+        //name.strip_prefix(Path::new(".")).unwrap();
+        println!("{:?}", name);
+        let zip_path = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name.to_str().unwrap()[2..]);
+        let zipped_name = zip_path.to_str().unwrap();
+        println!("{}", zipped_name);
 
         if name.is_file() {
-            //println!("adding file {:?}", name);
-            zipwriter.start_file(zipped_name, zip_options).unwrap();
-            let mut f = fs::File::open(name).unwrap();
+            println!("adding file {:?}", zipped_name);
+            zipwriter.start_file(zipped_name, zip_options)?;
+            let mut f = fs::File::open(name)?;
 
-            copy(&mut f, &mut zipwriter).unwrap();
+            copy(&mut f, &mut zipwriter)?;
         } else if name.as_os_str().len() != 0 {
-            //println!("adding dir  {:?}", name);
-            zipwriter.add_directory(zipped_name, zip_options).unwrap();
+            println!("adding dir  {:?}", zipped_name);
+            zipwriter.add_directory(zipped_name, zip_options)?;
         }
     }
 
     // Finish writing
-    zipwriter.finish().unwrap();
+    zipwriter.finish()?;
 
     if measure_time {
         println!("{}", time_zip_measure.elapsed().as_secs_f64());
     }
+
+    Ok(())
 }
 
 // Function to filter all files we don't want to add to archive
