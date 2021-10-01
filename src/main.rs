@@ -6,7 +6,7 @@ use walkdir::{DirEntry, WalkDir};
 use dirs;
 use glob;
 
-fn print_help(executable_name: &String, exit_code: i32) {
+fn print_help(executable_name: &str, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
                             No arguments: Pack mod from mod files in current path (pwd) and install into default mod path.\n\n    \
                             --install-dir PATH: Install mod to PATH instead of default one.\n      \
