@@ -3,8 +3,7 @@ use zip::{write::{ZipWriter, FileOptions}, CompressionMethod};
 use serde_json::from_reader;
 use serde::Deserialize;
 use walkdir::{DirEntry, WalkDir};
-use dirs;
-use glob;
+use glob::glob;
 
 fn print_help(executable_name: &str, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
@@ -80,7 +79,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     if check_old_versions {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.to_str().unwrap(), mod_name);
-        let mod_glob = glob::glob(&mod_glob_str)?.into_iter();
+        let mod_glob = glob(&mod_glob_str)?;
 
         // Delete if any other versions found
         for entry in mod_glob {
@@ -141,7 +140,7 @@ fn main() -> Result<(), Box<dyn Error>>{
             let mut f = fs::File::open(name)?;
 
             copy(&mut f, &mut zipwriter)?;
-        } else if name.as_os_str().len() != 0 {
+        } else if !name.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
             zipwriter.add_directory(zipped_name, zip_options)?;
         }
@@ -158,9 +157,9 @@ fn main() -> Result<(), Box<dyn Error>>{
 }
 
 // Function to filter all files we don't want to add to archive
-fn is_hidden(entry: &DirEntry, zip_file_name: &String) -> bool {
+fn is_hidden(entry: &DirEntry, zip_file_name: &str) -> bool {
     let entry_file_name = entry.file_name().to_str().unwrap();
     entry_file_name == zip_file_name ||
-        (entry_file_name != "." && entry_file_name.starts_with(".")) ||
+        (entry_file_name != "." && entry_file_name.starts_with('.')) ||
         entry_file_name == "build"
 }
