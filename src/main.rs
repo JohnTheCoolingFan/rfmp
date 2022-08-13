@@ -125,6 +125,9 @@ fn main() -> Result<(), Box<dyn Error>>{
     // Create writer
     let mut zipwriter = ZipWriter::new(zip_file);  
 
+    // Add root dir
+    zipwriter.add_directory(format!("{}_{}", mod_name, mod_version), zip_options)?;
+
     let time_zip_measure = Instant::now();
 
     // Let the zipping begin!
