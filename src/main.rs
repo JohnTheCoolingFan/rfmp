@@ -1,4 +1,5 @@
 use std::{fs, env, io::copy, path::{Path, PathBuf}, time::Instant, error::Error};
+use mtzip::ZipArchive;
 use zip::{write::{ZipWriter, FileOptions}, CompressionMethod};
 use serde_json::from_reader;
 use serde::Deserialize;
@@ -115,7 +116,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     }
 
     // Create mod file
-    let zip_file = fs::File::create(zip_file_path)?;
+    let mut zip_file = fs::File::create(zip_file_path)?;
 
     // Archive options. Deflated is best combination of speed and compression (for zip)
     // It would be cool if Factorio allowed other compression formats, like zstd
@@ -123,10 +124,12 @@ fn main() -> Result<(), Box<dyn Error>>{
     let zip_options = FileOptions::default().compression_method(CompressionMethod::Deflated);
 
     // Create writer
-    let mut zipwriter = ZipWriter::new(zip_file);  
+    //let mut zipwriter = ZipWriter::new(zip_file);  
+    let zipwriter = ZipArchive::default();
 
     // Add root dir
-    zipwriter.add_directory(format!("{}_{}", mod_name, mod_version), zip_options)?;
+    println!("Adding root dir");
+    zipwriter.add_directory(&format!("{}_{}", mod_name, mod_version));
 
     let time_zip_measure = Instant::now();
 
@@ -138,19 +141,18 @@ fn main() -> Result<(), Box<dyn Error>>{
         let zipped_name = zip_path.to_str().unwrap();
 
         if name.is_file() {
-            //println!("adding file {:?}", zipped_name);
-            zipwriter.start_file(zipped_name, zip_options)?;
-            let mut f = fs::File::open(name)?;
-
-            copy(&mut f, &mut zipwriter)?;
+            println!("adding file {:?}", zipped_name);
+            zipwriter.add_file(name, zipped_name);
         } else if !name.as_os_str().is_empty() {
-            //println!("adding dir  {:?}", zipped_name);
-            zipwriter.add_directory(zipped_name, zip_options)?;
+            println!("adding dir  {:?}", zipped_name);
+            zipwriter.add_directory(zipped_name);
         }
     }
 
     // Finish writing
-    zipwriter.finish()?;
+    //zipwriter.finish()?;
+    zipwriter.compress(12);
+    zipwriter.write(&mut zip_file);
 
     if measure_time {
         println!("{}", time_zip_measure.elapsed().as_secs_f64());

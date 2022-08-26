@@ -131,6 +131,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mtzip"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "06147eefd7d5790ab47cea10c0016325b666999e21d333c564e03f9fd5c29fc3"
+dependencies = [
+ "flate2",
+]
+
+[[package]]
 name = "pkg-config"
 version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -179,6 +188,7 @@ version = "0.1.8"
 dependencies = [
  "dirs",
  "glob",
+ "mtzip",
  "serde",
  "serde_json",
  "walkdir",
