@@ -27,17 +27,17 @@ fn main() -> Result<(), Box<dyn Error>>{
     let mut check_old_versions = true;
     let mut next_path = false;
     let mut measure_time = false;
-    let mut zip_file_path: PathBuf;
 
-    // Mod file path
-    #[cfg(target_os="linux")]
-    {
-        zip_file_path = dirs::home_dir().unwrap().join(PathBuf::from(".factorio/mods"));
+    // Mods directory path
+    let mut zip_file_path = if cfg!(target_os="linux") {
+        dirs::home_dir().unwrap().join(PathBuf::from(".factorio/mods"))
     }
-    #[cfg(target_os="windows")]
-    {
-        zip_file_path = dirs::data_dir().unwrap().join(PathBuf::from("Factorio/mods"));
+    else if cfg!(target_os="windows") {
+        dirs::data_dir().unwrap().join(PathBuf::from("Factorio/mods"))
     }
+    else {
+        PathBuf::from(".")
+    };
 
     // Collect args
     let mut args = env::args();
