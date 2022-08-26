@@ -4,6 +4,7 @@ use serde_json::from_reader;
 use serde::Deserialize;
 use walkdir::{DirEntry, WalkDir};
 use glob::glob;
+use sysinfo::SystemExt;
 
 fn print_help(executable_name: &str, exit_code: i32) {
     println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
@@ -144,8 +145,14 @@ fn main() -> Result<(), Box<dyn Error>>{
         }
     }
 
+    let threads = {
+        let ref_kind = sysinfo::RefreshKind::new().with_cpu(sysinfo::CpuRefreshKind::new());
+        let sys = sysinfo::System::new_with_specifics(ref_kind);
+        sys.cpus().len()
+    };
+
     // Finish writing
-    zipwriter.compress(12);
+    zipwriter.compress(threads);
     zipwriter.write(&mut zip_file);
 
     if measure_time {
