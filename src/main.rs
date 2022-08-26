@@ -23,10 +23,6 @@ struct InfoJson {
 }
 
 fn main() -> Result<(), Box<dyn Error>>{
-    // Flags for args
-    let mut check_old_versions = true;
-    let mut next_path = false;
-    let mut measure_time = false;
 
     // Mods directory path
     let mut zip_file_path = if cfg!(target_os="linux") {
@@ -41,6 +37,11 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     // Collect args
     let mut args = env::args();
+
+    // Flags for args
+    let mut check_old_versions = true;
+    let mut next_path = false;
+    let mut measure_time = false;
 
     // Parse args
     if args.len() > 1 {
