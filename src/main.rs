@@ -145,7 +145,6 @@ fn main() -> Result<(), Box<dyn Error>>{
     }
 
     // Finish writing
-    //zipwriter.finish()?;
     zipwriter.compress(12);
     zipwriter.write(&mut zip_file);
 
