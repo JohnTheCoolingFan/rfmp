@@ -14,6 +14,3 @@ All versions are available on GitLab releases page or ~~from my friend's server~
         - `data.lua`
         - `control.lua`
         - etc
-
-### TODO
-    - Custom deflate zipping library with multithreading?
