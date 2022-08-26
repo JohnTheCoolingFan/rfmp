@@ -72,8 +72,9 @@ fn main() -> Result<(), Box<dyn Error>>{
     let info_json: InfoJson = from_reader(info_file)?;
 
     // Get mod name/id and version
-    let mod_name = info_json.name;
-    let mod_version = info_json.version;
+    let mod_name = &info_json.name;
+    let mod_version = &info_json.version;
+    let mod_name_with_version = format!("{}_{}", mod_name, mod_version);
     
     // Check for other versions
     if check_old_versions {
@@ -95,7 +96,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     }
 
     // Mod file name
-    let zip_file_name = format!("{}_{}.zip", mod_name, mod_version);
+    let zip_file_name = format!("{}.zip", mod_name_with_version);
     zip_file_path.push(&zip_file_name);
 
     // Walkdir iter, filtered
@@ -122,7 +123,7 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     // Add root dir
     //println!("Adding root dir");
-    zipwriter.add_directory(&format!("{}_{}", mod_name, mod_version));
+    zipwriter.add_directory(&mod_name_with_version);
 
     let time_zip_measure = Instant::now();
 
@@ -130,7 +131,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     for entry in it {
         let entry = entry.unwrap();
         let name = entry.path();
-        let zip_path = Path::new(&format!("{}_{}", mod_name, mod_version)).join(&name.to_str().unwrap()[2..]);
+        let zip_path = Path::new(&mod_name_with_version).join(&name.to_str().unwrap()[2..]);
         let zipped_name = zip_path.to_str().unwrap();
 
         if name.is_file() {
