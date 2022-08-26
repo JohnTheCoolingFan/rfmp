@@ -27,10 +27,10 @@ fn main() -> Result<(), Box<dyn Error>>{
 
     // Mods directory path
     let mut zip_file_path = if cfg!(target_os="linux") {
-        dirs::home_dir().unwrap().join(PathBuf::from(".factorio/mods"))
+        dirs::home_dir().unwrap().join(".factorio/mods")
     }
     else if cfg!(target_os="windows") {
-        dirs::data_dir().unwrap().join(PathBuf::from("Factorio/mods"))
+        dirs::data_dir().unwrap().join("Factorio/mods")
     }
     else {
         PathBuf::from(".")
