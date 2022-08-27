@@ -5,16 +5,19 @@ use serde::Deserialize;
 use walkdir::{DirEntry, WalkDir};
 use glob::glob;
 use sysinfo::SystemExt;
+use clap::Parser;
 
-fn print_help(executable_name: &str, exit_code: i32) {
-    println!("Usage: {} [--install-dir PATH] [--no-clean]\n\n    \
-                            No arguments: Pack mod from mod files in current path (pwd) and install into default mod path.\n\n    \
-                            --install-dir PATH: Install mod to PATH instead of default one.\n      \
-                            Default path is `$HOME/.factorio/mods` and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`\n\n    \
-                            --no-clean: Do not search for other versions of the mod and do not remove them.\n\n    \
-                            --help: Show this message.\n\n    \
-                            --measure-time: measure duration of compression.", executable_name);
-    std::process::exit(exit_code);
+#[derive(Parser)]
+#[clap(author, version, about, long_about = None)]
+struct CliArgs {
+    #[clap(short, long, value_parser, value_name = "PATH", help = "Install mod to <PATH> instead of default path", long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.")]
+    install_dir: Option<String>,
+
+    #[clap(short, long, action, help = "Do not search for other versions of the mod and do not try to remove them.")]
+    no_clean: bool,
+
+    #[clap(short, long, action, help = "Measure how long compression takes.")]
+    measure_time: bool
 }
 
 #[derive(Deserialize)]
@@ -24,9 +27,11 @@ struct InfoJson {
 }
 
 fn main() -> Result<(), Box<dyn Error>>{
+    let cli_args = CliArgs::parse();
 
     // Mods directory path
-    let mut zip_file_path = if cfg!(target_os="linux") {
+    let mut zip_file_path = cli_args.install_dir.map(PathBuf::from).unwrap_or_else(||
+    if cfg!(target_os="linux") {
         dirs::home_dir().unwrap().join(".factorio/mods")
     }
     else if cfg!(target_os="windows") {
@@ -34,36 +39,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     }
     else {
         PathBuf::from(".")
-    };
-
-    // Collect args
-    let mut args = env::args();
-
-    // Flags for args
-    let mut check_old_versions = true;
-    let mut next_path = false;
-    let mut measure_time = false;
-
-    // Parse args
-    if args.len() > 1 {
-        // This requires more reliability, especially user input checking.
-        let executable_name = args.next().unwrap();
-        for arg in args {
-            // This part looks especially jank
-            if next_path {
-                zip_file_path = PathBuf::from(arg);
-                next_path = false;
-            } else {
-                match arg.as_str() {
-                    "--help" => print_help(&executable_name, 0),
-                    "--install-dir" => next_path = true,
-                    "--no-clean" => check_old_versions = false,
-                    "--measure-time" => measure_time = true,
-                    _ => print_help(&executable_name, 1),
-                }
-            }
-        }
-    }
+    });
 
     if !zip_file_path.exists() {
         panic!("Error: {:?} doesn't exist", zip_file_path);
@@ -79,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     let mod_name_with_version = format!("{}_{}", mod_name, mod_version);
     
     // Check for other versions
-    if check_old_versions {
+    if !cli_args.no_clean {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!("{}/{}_*[0-9].*[0-9].*[0-9].zip", zip_file_path.to_str().unwrap(), mod_name);
         let mod_glob = glob(&mod_glob_str)?;
@@ -155,7 +131,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     zipwriter.compress(threads);
     zipwriter.write(&mut zip_file);
 
-    if measure_time {
+    if cli_args.measure_time {
         println!("{}", time_zip_measure.elapsed().as_secs_f64());
     }
 
