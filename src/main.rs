@@ -1,4 +1,4 @@
-use std::{fs, env, path::{Path, PathBuf}, time::Instant, error::Error};
+use std::{fs, path::{Path, PathBuf}, time::Instant, error::Error};
 use mtzip::ZipArchive;
 use serde_json::from_reader;
 use serde::Deserialize;
