@@ -128,8 +128,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     };
 
     // Finish writing
-    zipwriter.compress(threads);
-    zipwriter.write(&mut zip_file);
+    zipwriter.write(&mut zip_file, Some(threads));
 
     if cli_args.measure_time {
         println!("{}", time_zip_measure.elapsed().as_secs_f64());
