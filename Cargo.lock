@@ -250,9 +250,9 @@ dependencies = [
 
 [[package]]
 name = "mtzip"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69017acf7735a002056d1ee68bd86f985b807664fbed99639bde4bf2bac09fec"
+checksum = "5c8aef27bd6af5fe7dc407cc8f98974335df518ea1626c4b98de410d032319fd"
 dependencies = [
  "flate2",
 ]
