@@ -1,4 +1,4 @@
-use std::{fs, path::{Path, PathBuf}, time::Instant, error::Error};
+use std::{fs, path::{Path, PathBuf}, time::Instant, error::Error, io::BufWriter};
 use mtzip::ZipArchive;
 use serde_json::from_reader;
 use serde::Deserialize;
@@ -93,8 +93,6 @@ fn main() -> Result<(), Box<dyn Error>>{
         }
     }
 
-    // Create mod file
-    let mut zip_file = fs::File::create(zip_file_path)?;
 
     // Create archive
     let zipwriter = ZipArchive::default();
@@ -126,6 +124,9 @@ fn main() -> Result<(), Box<dyn Error>>{
         let sys = sysinfo::System::new_with_specifics(ref_kind);
         sys.cpus().len()
     };
+
+    // Create mod file
+    let mut zip_file = BufWriter::new(fs::File::create(zip_file_path)?);
 
     // Finish writing
     zipwriter.write(&mut zip_file, Some(threads));
