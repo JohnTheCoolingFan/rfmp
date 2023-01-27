@@ -69,7 +69,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Get mod name/id and version
     let mod_name = &info_json.name;
     let mod_version = &info_json.version;
-    let mod_name_with_version = format!("{}_{}", mod_name, mod_version);
+    let mod_name_with_version = format!("{mod_name}_{mod_version}");
 
     // Check for other versions
     if !cli_args.no_clean {
@@ -85,17 +85,17 @@ fn main() -> Result<(), Box<dyn Error>> {
         for entry in mod_glob {
             let entry = entry?;
             let entry_name = entry.to_str().unwrap();
-            println!("Removing {}", entry_name);
+            println!("Removing {entry_name}");
             if entry.is_file() {
                 fs::remove_file(&entry)?;
             } else {
-                println!("Failed to remove {}: not a file", entry_name);
+                println!("Failed to remove {entry_name}: not a file");
             }
         }
     }
 
     // Mod file name
-    let zip_file_name = format!("{}.zip", mod_name_with_version);
+    let zip_file_name = format!("{mod_name_with_version}.zip");
     zip_file_path.push(&zip_file_name);
 
     // Walkdir iter, filtered
