@@ -392,7 +392,6 @@ dependencies = [
  "mtzip",
  "serde",
  "serde_json",
- "sysinfo",
  "walkdir",
 ]
 

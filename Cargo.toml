@@ -17,5 +17,4 @@ mtzip = "0.6"
 walkdir = "2"
 dirs = "4"
 glob = "0.3"
-sysinfo = "0.25"
 clap = { version="3.2", features = ["derive"] }

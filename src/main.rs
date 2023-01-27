@@ -10,7 +10,6 @@ use std::{
     path::{Path, PathBuf},
     time::Instant,
 };
-use sysinfo::SystemExt;
 use walkdir::{DirEntry, WalkDir};
 
 #[derive(Parser)]
