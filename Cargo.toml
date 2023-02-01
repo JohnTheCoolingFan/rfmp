@@ -13,8 +13,10 @@ repository = "https://gitlab.com/JohnTheCoolingFan/rfmp"
 [dependencies]
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-mtzip = "0.7"
+#mtzip = "0.7"
+rayonzip = { path = "../rayonzip" }
 walkdir = "2"
 dirs = "4"
 glob = "0.3"
 clap = { version="3.2", features = ["derive"] }
+rayon = "1.6"

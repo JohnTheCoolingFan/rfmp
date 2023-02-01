@@ -1,6 +1,7 @@
 use clap::Parser;
 use glob::glob;
-use mtzip::ZipArchive;
+use rayon::{prelude::*, ThreadBuilder, ThreadPoolBuilder};
+use rayonzip::ZipArchive;
 use serde::Deserialize;
 use serde_json::from_reader;
 use std::{
@@ -116,8 +117,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    let threads = std::thread::available_parallelism().unwrap();
+
+    let thread_pool = ThreadPoolBuilder::new()
+        .num_threads(threads.into())
+        .build()
+        .unwrap();
+
     // Create archive
-    let zipwriter = ZipArchive::default();
+    let mut zipwriter = ZipArchive::new(&thread_pool);
 
     // Add root dir
     //println!("Adding root dir");
@@ -134,7 +142,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         if name.is_file() {
             //println!("adding file {:?}", zipped_name);
-            zipwriter.add_file(name, zipped_name);
+            zipwriter.add_file_from_fs(name, zipped_name);
         } else if !name.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
             zipwriter.add_directory(zipped_name);
@@ -145,7 +153,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut zip_file = BufWriter::new(fs::File::create(zip_file_path)?);
 
     // Finish writing
-    zipwriter.write(&mut zip_file);
+    zipwriter.write(&mut zip_file).unwrap();
 
     if cli_args.measure_time {
         println!("{}", time_zip_measure.elapsed().as_secs_f64());
