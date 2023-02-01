@@ -1,6 +1,6 @@
 use clap::Parser;
 use glob::glob;
-use rayon::{prelude::*, ThreadBuilder, ThreadPoolBuilder};
+use rayon::ThreadPoolBuilder;
 use rayonzip::ZipArchive;
 use serde::Deserialize;
 use serde_json::from_reader;
