@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli_args = CliArgs::parse();
 
     // Mods directory path
-    let mut zip_file_path = cli_args.install_dir.unwrap_or_else(|| {
+    let mut zip_file_path = cli_args.install_dir.clone().unwrap_or_else(|| {
         if cfg!(target_os = "linux") {
             dirs::home_dir().unwrap().join(".factorio/mods")
         } else if cfg!(target_os = "windows") {
@@ -103,13 +103,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     let walkdir = WalkDir::new(".");
     let mut it = walkdir
         .into_iter()
-        .filter_entry(|e| !is_hidden(e, &zip_file_name));
+        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude));
     it.next();
 
     // As testing found out, removing the file beforehand speeds up the whole process
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
     if zip_file_path.exists() {
-        println!("{} exists, removing.", zip_file_path.to_str().unwrap());
+        println!("{} exists, removing.", zip_file_path.to_string_lossy());
         if zip_file_path.is_file() {
             fs::remove_file(&zip_file_path)?;
         } else if zip_file_path.is_dir() {
@@ -153,9 +153,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 // Function to filter all files we don't want to add to archive
-fn is_hidden(entry: &DirEntry, zip_file_name: &str) -> bool {
+fn is_hidden(entry: &DirEntry, zip_file_name: &str, excludes: &[PathBuf]) -> bool {
     let entry_file_name = entry.file_name().to_str().unwrap();
     entry_file_name == zip_file_name
         || (entry_file_name != "." && entry_file_name.starts_with('.'))
-        || entry_file_name == "build"
+        || excludes.contains(&PathBuf::from(zip_file_name))
 }
