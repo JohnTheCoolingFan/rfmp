@@ -157,5 +157,5 @@ fn is_hidden(entry: &DirEntry, zip_file_name: &str, excludes: &[PathBuf]) -> boo
     let entry_file_name = entry.file_name().to_str().unwrap();
     entry_file_name == zip_file_name
         || (entry_file_name != "." && entry_file_name.starts_with('.'))
-        || excludes.contains(&PathBuf::from(zip_file_name))
+        || excludes.contains(&entry.path().into())
 }
