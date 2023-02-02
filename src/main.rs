@@ -77,7 +77,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!(
             "{}/{}_*[0-9].*[0-9].*[0-9].zip",
-            zip_file_path.to_str().unwrap(),
+            zip_file_path.to_string_lossy(),
             mod_name
         );
         let mod_glob = glob(&mod_glob_str)?;
@@ -85,7 +85,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         // Delete if any other versions found
         for entry in mod_glob {
             let entry = entry?;
-            let entry_name = entry.to_str().unwrap();
+            let entry_name = entry.to_string_lossy();
             println!("Removing {entry_name}");
             if entry.is_file() {
                 fs::remove_file(&entry)?;
@@ -131,7 +131,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Let the zipping begin!
     for path in it {
-        let zip_path = path_prefix.join(path.strip_prefix("./").unwrap());
+        let zip_path = path_prefix.join(path.strip_prefix("./")?);
         let zipped_name = zip_path.to_string_lossy();
 
         if path.is_file() {
