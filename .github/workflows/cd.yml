@@ -36,7 +36,7 @@ jobs:
       shell: bash
       run: |
         cp target/release/rfmp${{ matrix.extension }} target/release/rfmp-${{ matrix.os_suffix }}
-        sha256sum target/release/rfmp${{ matrix.extension }} > mrpack-downloader-${{ matrix.os_suffix }}.sha256
+        sha256sum target/release/rfmp${{ matrix.extension }} > rfmp-${{ matrix.os_suffix }}.sha256
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
