@@ -244,9 +244,9 @@ dependencies = [
 
 [[package]]
 name = "miniz_oxide"
-version = "0.6.4"
+version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2e212582ede878b109755efd0773a4f0f4ec851584cf0aefbeb4d9ecc114822"
+checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
 dependencies = [
  "adler",
 ]
@@ -339,9 +339,9 @@ dependencies = [
 
 [[package]]
 name = "rayonzip"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "02493b68bdffb831007faecbf41ac02827fbd3d68f16e3abe88570417bd34945"
+checksum = "4965c1d08c17ddaf4f607d16bad2d1ac6949b4e667056f3f65f12c224695310c"
 dependencies = [
  "flate2",
  "rayon",
