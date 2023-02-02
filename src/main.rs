@@ -103,7 +103,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let walkdir = WalkDir::new(".");
     let mut it = walkdir
         .into_iter()
-        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude));
+        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude))
+        .map(Result::unwrap)
+        .map(|de| de.path().to_path_buf());
     it.next();
 
     // As testing found out, removing the file beforehand speeds up the whole process
@@ -128,18 +130,16 @@ fn main() -> Result<(), Box<dyn Error>> {
     let path_prefix = Path::new(&mod_name_with_version);
 
     // Let the zipping begin!
-    for entry in it {
-        let entry = entry.unwrap();
-        let name = entry.path();
-        let zip_path = path_prefix.join(&name.to_str().unwrap()[2..]);
-        let zipped_name = zip_path.to_str().unwrap();
+    for path in it {
+        let zip_path = path_prefix.join(path.strip_prefix("./").unwrap());
+        let zipped_name = zip_path.to_string_lossy();
 
-        if name.is_file() {
+        if path.is_file() {
             //println!("adding file {:?}", zipped_name);
-            zipwriter.add_file(name, zipped_name);
-        } else if !name.as_os_str().is_empty() {
+            zipwriter.add_file(path, &zipped_name);
+        } else if !path.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
-            zipwriter.add_directory(zipped_name);
+            zipwriter.add_directory(&zipped_name);
         }
     }
 
