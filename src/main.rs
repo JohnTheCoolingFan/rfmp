@@ -21,7 +21,7 @@ struct CliArgs {
         help = "Install mod to <PATH> instead of default path",
         long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`."
     )]
-    install_dir: Option<String>,
+    install_dir: Option<PathBuf>,
 
     #[clap(
         short,
@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let cli_args = CliArgs::parse();
 
     // Mods directory path
-    let mut zip_file_path = cli_args.install_dir.map(PathBuf::from).unwrap_or_else(|| {
+    let mut zip_file_path = cli_args.install_dir.unwrap_or_else(|| {
         if cfg!(target_os = "linux") {
             dirs::home_dir().unwrap().join(".factorio/mods")
         } else if cfg!(target_os = "windows") {
