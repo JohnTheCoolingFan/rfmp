@@ -101,12 +101,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Walkdir iter, filtered
     let walkdir = WalkDir::new(".");
-    let mut it = walkdir
+    let it = walkdir
         .into_iter()
         .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude))
         .map(Result::unwrap)
-        .map(|de| de.path().to_path_buf());
-    it.next();
+        .map(|de| de.path().to_path_buf())
+        .skip(1);
 
     // As testing found out, removing the file beforehand speeds up the whole process
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
