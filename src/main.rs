@@ -8,7 +8,6 @@ use std::{
     fs,
     io::BufWriter,
     path::{Path, PathBuf},
-    time::Instant,
 };
 use walkdir::{DirEntry, WalkDir};
 
@@ -18,7 +17,6 @@ struct CliArgs {
     #[clap(
         short,
         long,
-        value_parser,
         value_name = "PATH",
         help = "Install mod to <PATH> instead of default path",
         long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`."
@@ -28,13 +26,17 @@ struct CliArgs {
     #[clap(
         short,
         long,
-        action,
         help = "Do not search for other versions of the mod and do not try to remove them."
     )]
     no_clean: bool,
 
-    #[clap(short, long, action, help = "Measure how long compression takes.")]
-    measure_time: bool,
+    #[clap(
+        short,
+        long,
+        value_name = "PATH",
+        help = "Exclude files or directories from being included in the archive"
+    )]
+    exclude: Vec<PathBuf>,
 }
 
 #[derive(Deserialize)]
@@ -123,8 +125,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     //println!("Adding root dir");
     zipwriter.add_directory(&mod_name_with_version);
 
-    let time_zip_measure = Instant::now();
-
     let path_prefix = Path::new(&mod_name_with_version);
 
     // Let the zipping begin!
@@ -148,10 +148,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Finish writing
     zipwriter.write(&mut zip_file);
-
-    if cli_args.measure_time {
-        println!("{}", time_zip_measure.elapsed().as_secs_f64());
-    }
 
     Ok(())
 }
