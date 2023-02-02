@@ -125,11 +125,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let time_zip_measure = Instant::now();
 
+    let path_prefix = Path::new(&mod_name_with_version);
+
     // Let the zipping begin!
     for entry in it {
         let entry = entry.unwrap();
         let name = entry.path();
-        let zip_path = Path::new(&mod_name_with_version).join(&name.to_str().unwrap()[2..]);
+        let zip_path = path_prefix.join(&name.to_str().unwrap()[2..]);
         let zipped_name = zip_path.to_str().unwrap();
 
         if name.is_file() {
