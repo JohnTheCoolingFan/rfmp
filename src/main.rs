@@ -55,6 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         } else if cfg!(target_os = "windows") {
             dirs::data_dir().unwrap().join("Factorio/mods")
         } else {
+            println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located");
             PathBuf::from(".")
         }
     });
