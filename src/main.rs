@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::from_reader;
 use std::{
     error::Error,
-    fs,
+    fs::{self, File},
     io::BufWriter,
     path::{Path, PathBuf},
 };
@@ -64,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Open info.json and parse it
-    let info_file = fs::File::open("info.json")?;
+    let info_file = File::open("info.json")?;
     let info_json: InfoJson = from_reader(info_file)?;
 
     // Get mod name/id and version
@@ -99,15 +99,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let zip_file_name = format!("{mod_name_with_version}.zip");
     zip_file_path.push(&zip_file_name);
 
-    // Walkdir iter, filtered
-    let walkdir = WalkDir::new(".");
-    let it = walkdir
-        .into_iter()
-        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude))
-        .map(Result::unwrap)
-        .map(|de| de.path().to_path_buf())
-        .skip(1);
-
     // As testing found out, removing the file beforehand speeds up the whole process
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
     if zip_file_path.exists() {
@@ -129,8 +120,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let path_prefix = Path::new(&mod_name_with_version);
 
+    // Walkdir iter, filtered
+    let walkdir = WalkDir::new(".")
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude))
+        .map(Result::unwrap)
+        .map(|de| de.path().to_path_buf())
+        .skip(1);
+
     // Let the zipping begin!
-    for path in it {
+    for path in walkdir {
         let zip_path = path_prefix.join(path.strip_prefix("./")?);
         let zipped_name = zip_path.to_string_lossy();
 
