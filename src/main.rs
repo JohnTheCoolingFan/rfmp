@@ -4,7 +4,6 @@ use mtzip::ZipArchive;
 use serde::Deserialize;
 use serde_json::from_reader;
 use std::{
-    error::Error,
     fs::{self, File},
     io::BufWriter,
     path::{Path, PathBuf},
@@ -61,7 +60,7 @@ fn main() {
     });
 
     if !zip_file_path.exists() {
-        panic!("Error: {:?} doesn't exist", zip_file_path);
+        panic!("Error: {} doesn't exist", zip_file_path.to_string_lossy());
     }
 
     // Open info.json and parse it
