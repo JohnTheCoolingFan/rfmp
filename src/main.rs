@@ -45,7 +45,7 @@ struct InfoJson {
     version: String,
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() {
     let cli_args = CliArgs::parse();
 
     // Mods directory path
@@ -65,8 +65,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Open info.json and parse it
-    let info_file = File::open("info.json")?;
-    let info_json: InfoJson = from_reader(info_file)?;
+    let info_file = File::open("info.json").unwrap();
+    let info_json: InfoJson = from_reader(info_file).unwrap();
 
     // Get mod name/id and version
     let mod_name = &info_json.name;
@@ -81,15 +81,15 @@ fn main() -> Result<(), Box<dyn Error>> {
             zip_file_path.to_string_lossy(),
             mod_name
         );
-        let mod_glob = glob(&mod_glob_str)?;
+        let mod_glob = glob(&mod_glob_str).unwrap();
 
         // Delete if any other versions found
         for entry in mod_glob {
-            let entry = entry?;
+            let entry = entry.unwrap();
             let entry_name = entry.to_string_lossy();
             println!("Removing {entry_name}");
             if entry.is_file() {
-                fs::remove_file(&entry)?;
+                fs::remove_file(&entry).unwrap();
             } else {
                 println!("Failed to remove {entry_name}: not a file");
             }
@@ -105,10 +105,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     if zip_file_path.exists() {
         println!("{} exists, removing.", zip_file_path.to_string_lossy());
         if zip_file_path.is_file() {
-            fs::remove_file(&zip_file_path)?;
+            fs::remove_file(&zip_file_path).unwrap();
         } else if zip_file_path.is_dir() {
             // Is this even possible?
-            fs::remove_dir(&zip_file_path)?;
+            fs::remove_dir(&zip_file_path).unwrap();
         }
     }
 
@@ -131,7 +131,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Let the zipping begin!
     for path in walkdir {
-        let zip_path = path_prefix.join(path.strip_prefix("./")?);
+        let zip_path = path_prefix.join(path.strip_prefix("./").unwrap());
         let zipped_name = zip_path.to_string_lossy();
 
         if path.is_file() {
@@ -144,12 +144,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     // Create mod file
-    let mut zip_file = BufWriter::new(fs::File::create(zip_file_path)?);
+    let mut zip_file = BufWriter::new(File::create(zip_file_path).unwrap());
 
     // Finish writing
     zipwriter.write(&mut zip_file);
-
-    Ok(())
 }
 
 // Function to filter all files we don't want to add to archive
