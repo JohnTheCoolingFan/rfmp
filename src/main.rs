@@ -64,8 +64,8 @@ fn main() {
     }
 
     // Open info.json and parse it
-    let info_file = File::open("info.json").unwrap();
-    let info_json: InfoJson = from_reader(info_file).unwrap();
+    let info_file = File::open("info.json").expect("info.json not  found");
+    let info_json: InfoJson = from_reader(info_file).expect("Failed to parse info.json");
 
     // Get mod name/id and version
     let mod_name = &info_json.name;
@@ -143,7 +143,8 @@ fn main() {
     }
 
     // Create mod file
-    let mut zip_file = BufWriter::new(File::create(zip_file_path).unwrap());
+    let mut zip_file =
+        BufWriter::new(File::create(zip_file_path).expect("Faield to open output file"));
 
     // Finish writing
     zipwriter.write(&mut zip_file);
