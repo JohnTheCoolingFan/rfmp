@@ -45,10 +45,14 @@ struct InfoJson {
 }
 
 fn main() {
-    let cli_args = CliArgs::parse();
+    let CliArgs {
+        install_dir,
+        no_clean,
+        exclude,
+    } = CliArgs::parse();
 
     // Mods directory path
-    let mut zip_file_path = cli_args.install_dir.clone().unwrap_or_else(|| {
+    let mut zip_file_path = install_dir.unwrap_or_else(|| {
         if cfg!(target_os = "linux") {
             dirs::home_dir().unwrap().join(".factorio/mods")
         } else if cfg!(target_os = "windows") {
@@ -73,7 +77,7 @@ fn main() {
     let mod_name_with_version = format!("{mod_name}_{mod_version}");
 
     // Check for other versions
-    if !cli_args.no_clean {
+    if !no_clean {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!(
             "{}/{}_*[0-9].*[0-9].*[0-9].zip",
@@ -123,7 +127,7 @@ fn main() {
     // Walkdir iter, filtered
     let walkdir = WalkDir::new(".")
         .into_iter()
-        .filter_entry(|e| !is_hidden(e, &zip_file_name, &cli_args.exclude))
+        .filter_entry(|e| !is_hidden(e, &zip_file_name, &exclude))
         .map(Result::unwrap)
         .map(|de| de.path().to_path_buf())
         .skip(1);
