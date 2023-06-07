@@ -144,7 +144,7 @@ fn main() {
 
     // Create mod file
     let mut zip_file =
-        BufWriter::new(File::create(zip_file_path).expect("Faield to open output file"));
+        BufWriter::new(File::create(zip_file_path).expect("Failed to open output file"));
 
     // Finish writing
     zipwriter.write(&mut zip_file);
