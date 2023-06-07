@@ -72,9 +72,7 @@ fn main() {
     let info_json: InfoJson = from_reader(info_file).expect("Failed to parse info.json");
 
     // Get mod name/id and version
-    let mod_name = &info_json.name;
-    let mod_version = &info_json.version;
-    let mod_name_with_version = format!("{mod_name}_{mod_version}");
+    let mod_name_with_version = format!("{}_{}", info_json.name, info_json.version);
 
     // Check for other versions
     if !no_clean {
@@ -82,7 +80,7 @@ fn main() {
         let mod_glob_str = format!(
             "{}/{}_*[0-9].*[0-9].*[0-9].zip",
             zip_file_path.to_string_lossy(),
-            mod_name
+            info_json.name
         );
         let mod_glob = glob(&mod_glob_str).unwrap();
 
