@@ -20,7 +20,8 @@ struct CliArgs {
         long,
         value_name = "PATH",
         help = "Install mod to <PATH> instead of default path",
-        long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.\nTakes priority over $FACTORIO_HOME environment variable"
+        long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.\nTakes priority over $FACTORIO_HOME environment variable",
+        env = "FACTORIO_MODS_HOME"
     )]
     install_dir: Option<PathBuf>,
 
@@ -70,15 +71,9 @@ fn get_info_json() -> InfoJson {
     from_reader(info_file).expect("Failed to parse info.json")
 }
 
-fn try_get_factorio_home_from_env() -> Option<PathBuf> {
-    std::env::var("FACTORIO_HOME").ok().map(PathBuf::from)
-}
-
 /// Mods directory path
 fn get_target_dir(install_dir: Option<PathBuf>) -> PathBuf {
-    let mods_target_dir = install_dir
-        .or_else(try_get_factorio_home_from_env)
-        .unwrap_or_else(get_default_factorio_home);
+    let mods_target_dir = install_dir.unwrap_or_else(get_default_factorio_home);
 
     if !mods_target_dir.exists() {
         panic!("Error: {} doesn't exist", mods_target_dir.to_string_lossy());
