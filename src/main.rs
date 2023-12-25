@@ -70,10 +70,14 @@ fn get_info_json() -> InfoJson {
     from_reader(info_file).expect("Failed to parse info.json")
 }
 
+fn try_get_factorio_home_from_env() -> Option<PathBuf> {
+    std::env::var("FACTORIO_HOME").ok().map(PathBuf::from)
+}
+
 /// Mods directory path
 fn get_target_dir(install_dir: Option<PathBuf>) -> PathBuf {
     let mods_target_dir = install_dir
-        .or_else(|| std::env::var("FACTORIO_HOME").map(PathBuf::from).ok())
+        .or_else(try_get_factorio_home_from_env)
         .unwrap_or_else(get_default_factorio_home);
 
     if !mods_target_dir.exists() {
