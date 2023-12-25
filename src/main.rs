@@ -20,7 +20,7 @@ struct CliArgs {
         long,
         value_name = "PATH",
         help = "Install mod to <PATH> instead of default path",
-        long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.\nTakes priority over $FACTORIO_HOME environment variable",
+        long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.\nTakes priority over $FACTORIO_MODS_HOME environment variable",
         env = "FACTORIO_MODS_HOME"
     )]
     install_dir: Option<PathBuf>,
