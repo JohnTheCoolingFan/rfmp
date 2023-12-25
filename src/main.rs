@@ -26,9 +26,10 @@ struct CliArgs {
     #[clap(
         short,
         long,
-        help = "Do not search for other versions of the mod and do not try to remove them."
+        help = "Do not search for other versions of the mod and do not try to remove them.",
+        alias = "no_clean"
     )]
-    no_clean: bool,
+    keep_old_versions: bool,
 
     #[clap(
         short,
@@ -65,7 +66,7 @@ fn get_info_json() -> InfoJson {
 fn main() {
     let CliArgs {
         install_dir,
-        no_clean,
+        keep_old_versions,
         exclude,
     } = CliArgs::parse();
 
@@ -84,7 +85,7 @@ fn main() {
     let mod_name_with_version = format!("{}_{}", info_json.name, info_json.version);
 
     // Check for other versions
-    if !no_clean {
+    if !keep_old_versions {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!(
             "{}/{}_*[0-9].*[0-9].*[0-9].zip",
