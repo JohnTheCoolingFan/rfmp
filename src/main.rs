@@ -45,6 +45,17 @@ struct InfoJson {
     version: String,
 }
 
+fn get_default_factorio_home() -> PathBuf {
+    if cfg!(target_os = "linux") {
+        dirs::home_dir().unwrap().join(".factorio/mods")
+    } else if cfg!(target_os = "windows") {
+        dirs::data_dir().unwrap().join("Factorio/mods")
+    } else {
+        println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
+        PathBuf::from(".")
+    }
+}
+
 fn main() {
     let CliArgs {
         install_dir,
@@ -55,17 +66,7 @@ fn main() {
     // Mods directory path
     let mods_target_dir = install_dir
         .or_else(|| std::env::var("FACTORIO_HOME").map(PathBuf::from).ok())
-        .unwrap_or_else(|| {
-            if cfg!(target_os = "linux") {
-                dirs::home_dir().unwrap().join(".factorio/mods")
-            } else if cfg!(target_os = "windows") {
-                dirs::data_dir().unwrap().join("Factorio/mods")
-            } else {
-                println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
-                PathBuf::from(".")
-            }
-        }
-    );
+        .unwrap_or_else(get_default_factorio_home);
 
     if !mods_target_dir.exists() {
         panic!("Error: {} doesn't exist", mods_target_dir.to_string_lossy());
