@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     fs::{self, File},
     io::BufWriter,
     path::{Path, PathBuf},
@@ -46,6 +47,12 @@ struct InfoJson {
     version: String,
 }
 
+impl Display for InfoJson {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}_{}", self.name, self.version)
+    }
+}
+
 fn get_default_factorio_home() -> PathBuf {
     if cfg!(target_os = "linux") {
         dirs::home_dir().unwrap().join(".factorio/mods")
@@ -63,14 +70,8 @@ fn get_info_json() -> InfoJson {
     from_reader(info_file).expect("Failed to parse info.json")
 }
 
-fn main() {
-    let CliArgs {
-        install_dir,
-        keep_old_versions,
-        exclude,
-    } = CliArgs::parse();
-
-    // Mods directory path
+/// Mods directory path
+fn get_target_dir(install_dir: Option<PathBuf>) -> PathBuf {
     let mods_target_dir = install_dir
         .or_else(|| std::env::var("FACTORIO_HOME").map(PathBuf::from).ok())
         .unwrap_or_else(get_default_factorio_home);
@@ -79,30 +80,67 @@ fn main() {
         panic!("Error: {} doesn't exist", mods_target_dir.to_string_lossy());
     }
 
+    mods_target_dir
+}
+
+fn make_glob_str(target_dir: &Path, mod_name: &str) -> String {
+    format!(
+        "{}/{}_*[0-9].*[0-9].*[0-9].zip",
+        target_dir.to_string_lossy(),
+        mod_name
+    )
+}
+
+fn remove_old_versions(target_dir: &Path, mod_name: &str) {
+    let mod_glob_str = make_glob_str(target_dir, mod_name);
+    let mod_glob = glob(&mod_glob_str).expect("Failed to construct glob");
+
+    // Delete if any other versions found
+    for entry in mod_glob.filter_map(Result::ok) {
+        println!("Removing {}", entry.to_string_lossy());
+        if entry.is_file() {
+            fs::remove_file(&entry).expect("Failed to remove file");
+        } else {
+            eprintln!("Failed to remove {}: not a file", entry.to_string_lossy());
+        }
+    }
+}
+
+/// Walkdir iter, filtered
+fn make_walkdir_iter<'a>(
+    zip_file_name: &'a str,
+    extra_exclude: &'a [PathBuf],
+) -> impl Iterator<Item = PathBuf> + 'a {
+    WalkDir::new(".")
+        .into_iter()
+        .filter_entry(|e| !is_hidden(e, zip_file_name, extra_exclude))
+        .filter_map(|de_res| match de_res {
+            Ok(de) => Some(de.path().to_path_buf()),
+            Err(e) => {
+                eprintln!("Error when walking the directory: {e}");
+                None
+            }
+        })
+        .skip(1)
+}
+
+fn main() {
+    let CliArgs {
+        install_dir,
+        keep_old_versions,
+        exclude,
+    } = CliArgs::parse();
+
+    let mods_target_dir = get_target_dir(install_dir);
+
     let info_json = get_info_json();
 
     // Get mod name/id and version
-    let mod_name_with_version = format!("{}_{}", info_json.name, info_json.version);
+    let mod_name_with_version = info_json.to_string();
 
     // Check for other versions
     if !keep_old_versions {
-        // Check if any version of the mod already installed/exist.
-        let mod_glob_str = format!(
-            "{}/{}_*[0-9].*[0-9].*[0-9].zip",
-            mods_target_dir.to_string_lossy(),
-            info_json.name
-        );
-        let mod_glob = glob(&mod_glob_str).expect("Failed to construct glob");
-
-        // Delete if any other versions found
-        for entry in mod_glob.filter_map(Result::ok) {
-            println!("Removing {}", entry.to_string_lossy());
-            if entry.is_file() {
-                fs::remove_file(&entry).expect("Failed to remove file");
-            } else {
-                eprintln!("Failed to remove {}: not a file", entry.to_string_lossy());
-            }
-        }
+        remove_old_versions(&mods_target_dir, &info_json.name)
     }
 
     // Mod file name
@@ -130,18 +168,7 @@ fn main() {
 
     let path_prefix = Path::new(&mod_name_with_version);
 
-    // Walkdir iter, filtered
-    let walkdir = WalkDir::new(".")
-        .into_iter()
-        .filter_entry(|e| !is_hidden(e, &zip_file_name, &exclude))
-        .filter_map(|de_res| match de_res {
-            Ok(de) => Some(de.path().to_path_buf()),
-            Err(e) => {
-                eprintln!("Error when walking the directory: {e}");
-                None
-            }
-        })
-        .skip(1);
+    let walkdir = make_walkdir_iter(&zip_file_name, &exclude);
 
     // Let the zipping begin!
     for path in walkdir {
@@ -168,7 +195,7 @@ fn main() {
     zipwriter.write(&mut zip_file);
 }
 
-// Function to filter all files we don't want to add to archive
+/// Function to filter all files we don't want to add to archive
 fn is_hidden(entry: &DirEntry, zip_file_name: &str, excludes: &[PathBuf]) -> bool {
     let entry_file_name = entry.file_name().to_str().unwrap();
     entry_file_name == zip_file_name
