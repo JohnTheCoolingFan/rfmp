@@ -53,19 +53,22 @@ fn main() {
     } = CliArgs::parse();
 
     // Mods directory path
-    let mut zip_file_path = install_dir.or_else(|| std::env::var("FACTORIO_HOME").map(PathBuf::from).ok()).unwrap_or_else(|| {
-        if cfg!(target_os = "linux") {
-            dirs::home_dir().unwrap().join(".factorio/mods")
-        } else if cfg!(target_os = "windows") {
-            dirs::data_dir().unwrap().join("Factorio/mods")
-        } else {
-            println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
-            PathBuf::from(".")
+    let mods_target_dir = install_dir
+        .or_else(|| std::env::var("FACTORIO_HOME").map(PathBuf::from).ok())
+        .unwrap_or_else(|| {
+            if cfg!(target_os = "linux") {
+                dirs::home_dir().unwrap().join(".factorio/mods")
+            } else if cfg!(target_os = "windows") {
+                dirs::data_dir().unwrap().join("Factorio/mods")
+            } else {
+                println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
+                PathBuf::from(".")
+            }
         }
-    });
+    );
 
-    if !zip_file_path.exists() {
-        panic!("Error: {} doesn't exist", zip_file_path.to_string_lossy());
+    if !mods_target_dir.exists() {
+        panic!("Error: {} doesn't exist", mods_target_dir.to_string_lossy());
     }
 
     // Open info.json and parse it
@@ -80,37 +83,35 @@ fn main() {
         // Check if any version of the mod already installed/exist.
         let mod_glob_str = format!(
             "{}/{}_*[0-9].*[0-9].*[0-9].zip",
-            zip_file_path.to_string_lossy(),
+            mods_target_dir.to_string_lossy(),
             info_json.name
         );
-        let mod_glob = glob(&mod_glob_str).unwrap();
+        let mod_glob = glob(&mod_glob_str).expect("Failed to construct glob");
 
         // Delete if any other versions found
-        for entry in mod_glob {
-            let entry = entry.unwrap();
-            let entry_name = entry.to_string_lossy();
-            println!("Removing {entry_name}");
+        for entry in mod_glob.filter_map(Result::ok) {
+            println!("Removing {}", entry.to_string_lossy());
             if entry.is_file() {
-                fs::remove_file(&entry).unwrap();
+                fs::remove_file(&entry).expect("Failed to remove file");
             } else {
-                println!("Failed to remove {entry_name}: not a file");
+                eprintln!("Failed to remove {}: not a file", entry.to_string_lossy());
             }
         }
     }
 
     // Mod file name
     let zip_file_name = format!("{mod_name_with_version}.zip");
-    zip_file_path.push(&zip_file_name);
+    let target_zip_file = mods_target_dir.join(&zip_file_name);
 
     // As testing found out, removing the file beforehand speeds up the whole process
     // Delete existing file. This probably wouldn't run unless --no-clean argument is passed.
-    if zip_file_path.exists() {
-        println!("{} exists, removing.", zip_file_path.to_string_lossy());
-        if zip_file_path.is_file() {
-            fs::remove_file(&zip_file_path).unwrap();
-        } else if zip_file_path.is_dir() {
+    if target_zip_file.exists() {
+        println!("{} exists, removing.", target_zip_file.to_string_lossy());
+        if target_zip_file.is_file() {
+            fs::remove_file(&target_zip_file).expect("Failed to remove file");
+        } else if target_zip_file.is_dir() {
             // Is this even possible?
-            fs::remove_dir(&zip_file_path).unwrap();
+            fs::remove_dir(&target_zip_file).expect("Failed to remove directory");
         }
     }
 
@@ -127,13 +128,21 @@ fn main() {
     let walkdir = WalkDir::new(".")
         .into_iter()
         .filter_entry(|e| !is_hidden(e, &zip_file_name, &exclude))
-        .map(Result::unwrap)
-        .map(|de| de.path().to_path_buf())
+        .filter_map(|de_res| match de_res {
+            Ok(de) => Some(de.path().to_path_buf()),
+            Err(e) => {
+                eprintln!("Error when walking the directory: {e}");
+                None
+            }
+        })
         .skip(1);
 
     // Let the zipping begin!
     for path in walkdir {
-        let zip_path = path_prefix.join(path.strip_prefix("./").unwrap());
+        let zip_path = path_prefix.join(
+            path.strip_prefix("./")
+                .expect("Failed to strip './' prefix"),
+        );
         let zipped_name = zip_path.to_string_lossy();
 
         if path.is_file() {
@@ -147,7 +156,7 @@ fn main() {
 
     // Create mod file
     let mut zip_file =
-        BufWriter::new(File::create(zip_file_path).expect("Failed to open output file"));
+        BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
 
     // Finish writing
     zipwriter.write(&mut zip_file);
