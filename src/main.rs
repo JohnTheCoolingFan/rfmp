@@ -56,6 +56,12 @@ fn get_default_factorio_home() -> PathBuf {
     }
 }
 
+/// Open info.json and parse it
+fn get_info_json() -> InfoJson {
+    let info_file = File::open("info.json").expect("info.json not  found");
+    from_reader(info_file).expect("Failed to parse info.json")
+}
+
 fn main() {
     let CliArgs {
         install_dir,
@@ -72,9 +78,7 @@ fn main() {
         panic!("Error: {} doesn't exist", mods_target_dir.to_string_lossy());
     }
 
-    // Open info.json and parse it
-    let info_file = File::open("info.json").expect("info.json not  found");
-    let info_json: InfoJson = from_reader(info_file).expect("Failed to parse info.json");
+    let info_json = get_info_json();
 
     // Get mod name/id and version
     let mod_name_with_version = format!("{}_{}", info_json.name, info_json.version);
