@@ -187,7 +187,9 @@ fn main() {
             );
         } else if !path.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
-            zipwriter.add_directory(zipped_name.to_string());
+            zipwriter
+                .add_directory_with_metadata_from_fs(zipped_name.to_string(), path)
+                .unwrap();
         }
     }
 
