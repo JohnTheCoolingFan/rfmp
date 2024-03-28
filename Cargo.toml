@@ -11,7 +11,8 @@ repository = "https://github.com/JohnTheCoolingFan/rfmp"
 [dependencies]
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
-mtzip = "1.1"
+mtzip = { path = "../mtzip" }
+#mtzip = "1.1"
 walkdir = "2"
 dirs = "5"
 glob = "0.3"

@@ -7,7 +7,7 @@ use std::{
 
 use clap::Parser;
 use glob::glob;
-use mtzip::ZipArchive;
+use mtzip::{level::CompressionLevel, ZipArchive};
 use serde::Deserialize;
 use serde_json::from_reader;
 use walkdir::{DirEntry, WalkDir};
@@ -179,7 +179,12 @@ fn main() {
 
         if path.is_file() {
             //println!("adding file {:?}", zipped_name);
-            zipwriter.add_file(path, &zipped_name);
+            zipwriter.add_file_from_fs(
+                path,
+                zipped_name.to_string(),
+                Some(CompressionLevel::best()),
+                None,
+            );
         } else if !path.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
             zipwriter.add_directory(zipped_name.to_string());
@@ -191,7 +196,7 @@ fn main() {
         BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
 
     // Finish writing
-    zipwriter.write(&mut zip_file);
+    zipwriter.write_with_threads(&mut zip_file, 12).unwrap();
 }
 
 /// Function to filter all files we don't want to add to archive
