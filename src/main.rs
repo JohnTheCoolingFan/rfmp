@@ -163,7 +163,7 @@ fn main() {
 
     // Add root dir
     //println!("Adding root dir");
-    zipwriter.add_directory(mod_name_with_version.clone());
+    zipwriter.add_directory(mod_name_with_version.clone(), None);
 
     let path_prefix = Path::new(&mod_name_with_version);
 
