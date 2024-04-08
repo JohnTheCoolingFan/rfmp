@@ -5,7 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use clap::Parser;
+use clap::{builder::TypedValueParser, Parser};
 use glob::glob;
 use mtzip::{level::CompressionLevel, ZipArchive};
 use serde::Deserialize;
@@ -15,31 +15,34 @@ use walkdir::{DirEntry, WalkDir};
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 struct CliArgs {
-    #[clap(
-        short,
-        long,
-        value_name = "PATH",
-        help = "Install mod to <PATH> instead of default path",
-        long_help = "Install mod to <PATH> instead of default path.\nDefault path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\\Factorio\\mods`.\nTakes priority over $FACTORIO_MODS_HOME environment variable",
-        env = "FACTORIO_MODS_HOME"
-    )]
+    /// Install mod to <PATH> instead of default path.
+    ///
+    /// Default path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\Factorio\mods`.
+    /// Takes priority over $FACTORIO_MODS_HOME environment variable
+    #[clap(short, long, value_name = "PATH", env = "FACTORIO_MODS_HOME")]
     install_dir: Option<PathBuf>,
 
-    #[clap(
-        short,
-        long,
-        help = "Do not search for other versions of the mod and do not try to remove them.",
-        alias = "no_clean"
-    )]
+    /// Do not search for other versions of the mod and do not try to remove them.
+    #[clap(short, long, alias = "no_clean")]
     keep_old_versions: bool,
 
-    #[clap(
-        short,
-        long,
-        value_name = "PATH",
-        help = "Exclude files or directories from being included in the archive"
-    )]
+    /// Exclude files or directories from being included in teh archive
+    #[clap(short, long, value_name = "PATH")]
     exclude: Vec<PathBuf>,
+
+    // SAFETY: value range is restricted when clap parses an integer
+    /// Set compression level to use instead of default.
+    ///
+    /// Default is best compression, 9.
+    #[clap(short, long, value_parser = clap::value_parser!(u8).range(0..=9).map(|v| unsafe { CompressionLevel::new_unchecked(v) }))]
+    level: Option<CompressionLevel>,
+
+    /// Don't compress any data.
+    ///
+    /// Stored is a "compression" level where the file data is stored directly without any
+    /// compression.
+    #[clap(short, long)]
+    stored: bool,
 }
 
 #[derive(Deserialize)]
@@ -128,6 +131,8 @@ fn main() {
         install_dir,
         keep_old_versions,
         exclude,
+        level,
+        stored,
     } = CliArgs::parse();
 
     let mods_target_dir = get_target_dir(install_dir);
