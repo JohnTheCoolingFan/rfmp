@@ -7,7 +7,7 @@ use std::{
 
 use clap::{builder::TypedValueParser, Parser};
 use glob::glob;
-use mtzip::{level::CompressionLevel, ZipArchive};
+use mtzip::{level::CompressionLevel, CompressionType, ZipArchive};
 use serde::Deserialize;
 use serde_json::from_reader;
 use walkdir::{DirEntry, WalkDir};
@@ -187,8 +187,8 @@ fn main() {
             zipwriter.add_file_from_fs(
                 path,
                 zipped_name.to_string(),
-                Some(CompressionLevel::best()),
-                None,
+                level,
+                stored.then_some(CompressionType::Stored),
             );
         } else if !path.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
