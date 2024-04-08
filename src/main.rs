@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsStr,
     fmt::Display,
     fs::{self, File},
     io::BufWriter,
@@ -115,7 +116,7 @@ fn make_walkdir_iter<'a>(
 ) -> impl Iterator<Item = PathBuf> + 'a {
     WalkDir::new(".")
         .into_iter()
-        .filter_entry(|e| !is_hidden(e, zip_file_name, extra_exclude))
+        .filter_entry(|e| !walkdir_filter(e, zip_file_name, extra_exclude))
         .filter_map(|de_res| match de_res {
             Ok(de) => Some(de.path().to_path_buf()),
             Err(e) => {
@@ -210,9 +211,26 @@ fn main() {
 }
 
 /// Function to filter all files we don't want to add to archive
-fn is_hidden(entry: &DirEntry, zip_file_name: &str, excludes: &[PathBuf]) -> bool {
-    let entry_file_name = entry.file_name().to_str().unwrap();
-    entry_file_name == zip_file_name
-        || (entry_file_name != "." && entry_file_name.starts_with('.'))
-        || excludes.contains(&entry.path().into())
+fn walkdir_filter(entry: &DirEntry, zip_file_name: &str, excludes: &[PathBuf]) -> bool {
+    let entry_path = entry.path();
+    let filename = entry.file_name();
+    is_filename_eq(filename, zip_file_name)
+        || is_hidden(entry_path, filename)
+        || is_in_excludes(entry_path, excludes)
+}
+
+fn is_filename_eq(filename: &OsStr, rhs: &str) -> bool {
+    filename.to_str().map(|v| v == rhs).unwrap_or(false)
+}
+
+fn is_hidden(path: &Path, filename: &OsStr) -> bool {
+    path != AsRef::<Path>::as_ref(&".")
+        && filename
+            .to_str()
+            .map(|filename| filename.starts_with('.'))
+            .unwrap_or(false)
+}
+
+fn is_in_excludes(path: &Path, excludes: &[PathBuf]) -> bool {
+    excludes.iter().any(|e| path.starts_with(e))
 }
