@@ -12,7 +12,7 @@ use serde::Deserialize;
 use serde_json::from_reader;
 use walkdir::{DirEntry, WalkDir};
 
-#[derive(Parser)]
+#[derive(Debug, Clone, Parser)]
 #[clap(author, version, about, long_about = None)]
 struct CliArgs {
     /// Install mod to <PATH> instead of default path.
@@ -127,13 +127,16 @@ fn make_walkdir_iter<'a>(
 }
 
 fn main() {
+    let cli_args = CliArgs::parse();
+    #[cfg(debug_assertions)]
+    println!("{cli_args:?}");
     let CliArgs {
         install_dir,
         keep_old_versions,
         exclude,
         level,
         stored,
-    } = CliArgs::parse();
+    } = cli_args;
 
     let mods_target_dir = get_target_dir(install_dir);
 
