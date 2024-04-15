@@ -168,7 +168,7 @@ fn main() {
     }
 
     // Create archive
-    let zipwriter = ZipArchive::default();
+    let mut zipwriter = ZipArchive::default();
 
     // Add root dir
     //println!("Adding root dir");
