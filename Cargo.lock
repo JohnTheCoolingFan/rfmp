@@ -210,9 +210,7 @@ dependencies = [
 
 [[package]]
 name = "mtzip"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99dfc42857ac35ec86c694d6aa0c669dbed0c37cbe51d4672245b21f8a959055"
+version = "2.0.1"
 dependencies = [
  "cfg-if",
  "flate2",
@@ -255,7 +253,7 @@ dependencies = [
 
 [[package]]
 name = "rfmp"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "clap",
  "dirs",
