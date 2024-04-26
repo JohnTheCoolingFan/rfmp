@@ -18,8 +18,9 @@ use walkdir::{DirEntry, WalkDir};
 struct CliArgs {
     /// Install mod to <PATH> instead of default path.
     ///
-    /// Default path is `$HOME/.factorio/mods` on linux and `{{FOLDERID_RoamingAppData}}\Factorio\mods`.
-    /// Takes priority over $FACTORIO_MODS_HOME environment variable
+    /// Default path is `$HOME/.factorio/mods` on linux and
+    /// `{{FOLDERID_RoamingAppData}}\Factorio\mods`. Takes priority over $FACTORIO_MODS_HOME
+    /// environment variable
     #[clap(short, long, value_name = "PATH", env = "FACTORIO_MODS_HOME")]
     install_dir: Option<PathBuf>,
 
