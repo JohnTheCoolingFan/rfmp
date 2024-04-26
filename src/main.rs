@@ -25,7 +25,7 @@ struct CliArgs {
     install_dir: Option<PathBuf>,
 
     /// Do not search for other versions of the mod and do not try to remove them.
-    #[clap(short, long, alias = "no_clean")]
+    #[clap(short, long, alias = "no-clean")]
     keep_old_versions: bool,
 
     /// Exclude files or directories from being included in teh archive
