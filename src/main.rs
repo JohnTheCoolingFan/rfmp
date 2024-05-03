@@ -208,7 +208,7 @@ fn main() {
         BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
 
     // Finish writing
-    zipwriter.write_with_threads(&mut zip_file, 12).unwrap();
+    zipwriter.write(&mut zip_file).unwrap();
 }
 
 /// Function to filter all files we don't want to add to archive
