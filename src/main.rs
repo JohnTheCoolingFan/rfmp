@@ -3,6 +3,7 @@ use std::{
     fmt::Display,
     fs::{self, File},
     io::BufWriter,
+    num::NonZeroUsize,
     path::{Path, PathBuf},
 };
 
@@ -45,6 +46,10 @@ struct CliArgs {
     /// compression.
     #[clap(short, long)]
     stored: bool,
+
+    /// Amount of threads that will be used for compression.
+    #[clap(short, long)]
+    threads: Option<NonZeroUsize>,
 }
 
 #[derive(Deserialize)]
@@ -138,6 +143,7 @@ fn main() {
         exclude,
         level,
         stored,
+        threads,
     } = cli_args;
 
     let mods_target_dir = get_target_dir(install_dir);
@@ -208,7 +214,12 @@ fn main() {
         BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
 
     // Finish writing
-    zipwriter.write_with_threads(&mut zip_file, 12).unwrap();
+    match threads {
+        Some(amount) => zipwriter
+            .write_with_threads(&mut zip_file, amount.get())
+            .unwrap(),
+        None => zipwriter.write(&mut zip_file).unwrap(),
+    }
 }
 
 /// Function to filter all files we don't want to add to archive
