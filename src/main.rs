@@ -7,10 +7,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use cfg_if::cfg_if;
 use clap::{builder::TypedValueParser, Parser};
 use glob::glob;
 use mtzip::{level::CompressionLevel, CompressionType, ZipArchive};
-use rayon::ThreadPoolBuilder;
 use serde::Deserialize;
 use serde_json::from_reader;
 use walkdir::{DirEntry, WalkDir};
@@ -49,6 +49,10 @@ struct CliArgs {
     stored: bool,
 
     /// Amount of threads that will be used for compression.
+    #[cfg_attr(
+        feature = "rayon",
+        doc = "\nAn environment variable `RAYON_NUM_THREADS` can also be used to control this value, but the argument takes priority."
+    )]
     #[clap(short, long)]
     threads: Option<NonZeroUsize>,
 }
@@ -134,11 +138,37 @@ fn make_walkdir_iter<'a>(
         .skip(1)
 }
 
+#[cfg(feature = "rayon")]
 fn set_new_thread_pool(threads: usize) {
+    use rayon::ThreadPoolBuilder;
     ThreadPoolBuilder::new()
         .num_threads(threads)
         .build_global()
         .unwrap()
+}
+
+fn write_zip_file(mut zipwriter: ZipArchive, output_path: &Path, threads: Option<NonZeroUsize>) {
+    cfg_if! {
+        if #[cfg(feature = "rayon")] {
+            if let Some(threads) = threads.map(NonZeroUsize::get) {
+                set_new_thread_pool(threads);
+            }
+
+            let mut zip_file =
+                BufWriter::new(File::create(output_path).expect("Failed to open output file"));
+
+            zipwriter.write_with_rayon(&mut zip_file).unwrap();
+        } else {
+            let mut zip_file =
+                BufWriter::new(File::create(output_path).expect("Failed to open output file"));
+
+            if let Some(threads) = threads.map(NonZeroUsize::get) {
+                zipwriter.write_with_threads(&mut zip_file, threads).unwrap();
+            } else {
+                zipwriter.write(&mut zip_file).unwrap();
+            }
+        }
+    }
 }
 
 fn main() {
@@ -153,10 +183,6 @@ fn main() {
         stored,
         threads,
     } = cli_args;
-
-    if let Some(threads) = threads.map(NonZeroUsize::get) {
-        set_new_thread_pool(threads);
-    }
 
     let mods_target_dir = get_target_dir(install_dir);
 
@@ -221,11 +247,7 @@ fn main() {
         }
     }
 
-    // Create mod file
-    let mut zip_file =
-        BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
-
-    zipwriter.write_with_rayon(&mut zip_file).unwrap();
+    write_zip_file(zipwriter, &target_zip_file, threads);
 }
 
 /// Function to filter all files we don't want to add to archive
