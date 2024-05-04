@@ -17,3 +17,7 @@ All versions are available on GitHub releases page.
 
 ### Speed
 This program manages to outperform (i.e. do the job faster) [my 7zip-based build script](https://gist.github.com/JohnTheCoolingFan/eb0587b1156b137cb1cbf7111e82d14b) on my machine (Ryzen 5 3600). This is achieved by using library [mtzip](https://crates.io/crates/mtzip) (also made by me). It splits the file compression jobs into tasks that can be run concurrently.
+
+## Rayon support
+
+[`rayon`](https://crates.io/crates/rayon) is supported as an alternative  to `mtzip`'s thread management. It can be enabled with `rayon` feature, replaces the default behavior. From my personal testing, it results in a lightly lower performance in extreme situations, but nothing that can be noticed without timing the execution time.
