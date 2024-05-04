@@ -70,13 +70,15 @@ impl Display for InfoJson {
 }
 
 fn get_default_factorio_home() -> PathBuf {
-    if cfg!(target_os = "linux") {
-        dirs::home_dir().unwrap().join(".factorio/mods")
-    } else if cfg!(target_os = "windows") {
-        dirs::data_dir().unwrap().join("Factorio/mods")
-    } else {
-        println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
-        PathBuf::from(".")
+    cfg_if! {
+        if #[cfg(target_os = "linux")] {
+            dirs::home_dir().unwrap().join(".factorio/mods")
+        } else if #[cfg(target_os = "windows")] {
+            dirs::data_dir().unwrap().join("Factorio/mods")
+        } else {
+            println!("Warning: unknown OS. Please report to github what OS you use and where `mods` directory is located. Using current directory as a fallback");
+            PathBuf::from(".")
+        }
     }
 }
 
