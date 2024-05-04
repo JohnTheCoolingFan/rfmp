@@ -143,7 +143,7 @@ fn main() {
         exclude,
         level,
         stored,
-        threads,
+        threads: _,
     } = cli_args;
 
     let mods_target_dir = get_target_dir(install_dir);
@@ -213,13 +213,7 @@ fn main() {
     let mut zip_file =
         BufWriter::new(File::create(target_zip_file).expect("Failed to open output file"));
 
-    // Finish writing
-    match threads {
-        Some(amount) => zipwriter
-            .write_with_threads(&mut zip_file, amount.get())
-            .unwrap(),
-        None => zipwriter.write(&mut zip_file).unwrap(),
-    }
+    zipwriter.write_with_rayon(&mut zip_file).unwrap();
 }
 
 /// Function to filter all files we don't want to add to archive
