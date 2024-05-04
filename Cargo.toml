@@ -9,7 +9,7 @@ homepage = "https://discord.gg/rqkaeYJhzS"
 repository = "https://github.com/JohnTheCoolingFan/rfmp"
 
 [features]
-rayon = ["dep:rayon"]
+rayon = ["dep:rayon", "mtzip/rayon"]
 
 [dependencies]
 serde_json = "1"
@@ -18,7 +18,6 @@ walkdir = "2"
 dirs = "5"
 glob = "0.3"
 clap = { version="4.2", features = ["derive", "env"] }
-#mtzip = "2.0.0"
-mtzip = { path = "../mtzip", features = ["rayon"] }
+mtzip = "3.0.0"
 rayon = { version = "1.10.0", optional = true }
 cfg-if = "1.0.0"

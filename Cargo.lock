@@ -248,7 +248,9 @@ dependencies = [
 
 [[package]]
 name = "mtzip"
-version = "2.0.1"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3ac83ea295c455e3b418b938da09b3bc6f32953b736a882292c80b914b19d89c"
 dependencies = [
  "cfg-if",
  "flate2",
