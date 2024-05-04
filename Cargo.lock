@@ -311,6 +311,7 @@ dependencies = [
  "dirs",
  "glob",
  "mtzip",
+ "rayon",
  "serde",
  "serde_json",
  "walkdir",
