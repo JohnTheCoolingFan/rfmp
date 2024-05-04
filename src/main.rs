@@ -10,6 +10,7 @@ use std::{
 use clap::{builder::TypedValueParser, Parser};
 use glob::glob;
 use mtzip::{level::CompressionLevel, CompressionType, ZipArchive};
+use rayon::ThreadPoolBuilder;
 use serde::Deserialize;
 use serde_json::from_reader;
 use walkdir::{DirEntry, WalkDir};
@@ -133,6 +134,13 @@ fn make_walkdir_iter<'a>(
         .skip(1)
 }
 
+fn set_new_thread_pool(threads: usize) {
+    ThreadPoolBuilder::new()
+        .num_threads(threads)
+        .build_global()
+        .unwrap()
+}
+
 fn main() {
     let cli_args = CliArgs::parse();
     #[cfg(debug_assertions)]
@@ -143,8 +151,12 @@ fn main() {
         exclude,
         level,
         stored,
-        threads: _,
+        threads,
     } = cli_args;
+
+    if let Some(threads) = threads.map(NonZeroUsize::get) {
+        set_new_thread_pool(threads);
+    }
 
     let mods_target_dir = get_target_dir(install_dir);
 
