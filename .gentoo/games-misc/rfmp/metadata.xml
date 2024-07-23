@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+
+<pkgmetadata>
+    <maintainer type="person">
+        <email>ivan8215145640@gmail.com</email>
+        <name>JohnTheCoolingFan</name>
+    </maintainer>
+    <upstream>
+        <maintainer>
+            <email>ivan8215145640@gmail.com</email>
+            <name>JohnTheCoolingFan</name>
+        </maintainer>
+        <bugs-to>https://github.com/JohnTheCoolingFan/rfmp/issues</bugs-to>
+        <doc>https://github.com/JohnTheCoolingFan/rfmp</doc>
+    </upstream>
+</pkgmetadata>
