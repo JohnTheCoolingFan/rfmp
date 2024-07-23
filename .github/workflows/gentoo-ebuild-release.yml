@@ -25,6 +25,7 @@ jobs:
     # release ebuild
     - uses: hacking-gentoo/action-ebuild-release@v1
       with:
+        overlay_branch: 'main'
         auth_token: ${{ secrets.PR_TOKEN }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
         overlay_repo: JohnTheCoolingFan/jtcf-ebuild-repo
