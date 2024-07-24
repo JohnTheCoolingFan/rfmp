@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # Check out the repository
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
     - name: Install cargo-ebuild
       uses: baptiste0928/cargo-install@v3
@@ -22,11 +22,16 @@ jobs:
         OUT_EBUILD=$(cargo ebuild -T .gentoo/games-misc/rfmp/rfmp.tera | sed -e '/\(Wrote: .*\)/!d;s/Wrote: \(.*\)/\1/')
         mv $OUT_EBUILD .gentoo/games-misc/rfmp/rfmp-9999.ebuild
 
-    # release ebuild
-    - uses: hacking-gentoo/action-ebuild-release@v1
+        
+    - name: Release ebuild
+      uses: hacking-gentoo/action-ebuild-release@v1
       with:
         overlay_branch: 'main'
         auth_token: ${{ secrets.PR_TOKEN }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
         overlay_repo: JohnTheCoolingFan/jtcf-ebuild-repo
+
+    - name: Dump docker logs on failure
+      if: failure()
+      uses: jwalton/gh-docker-logs@v2
 
