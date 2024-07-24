@@ -24,9 +24,9 @@ jobs:
 
         
     - name: Release ebuild
-      uses: hacking-gentoo/action-ebuild-release@v1
+      uses: JohnTheCoolingFan/action-ebuild-release@change-default-branch
       with:
-        overlay_branch: 'main'
+        default_branch: 'main'
         auth_token: ${{ secrets.PR_TOKEN }}
         deploy_key: ${{ secrets.DEPLOY_KEY }}
         overlay_repo: JohnTheCoolingFan/jtcf-ebuild-repo
