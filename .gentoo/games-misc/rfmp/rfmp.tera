@@ -1,5 +1,7 @@
 {%- extends "base.tera" -%}
 
+{%- block src_uri -%}{% raw -%}"${CARGO_CRATE_URIS}"{%- endraw%}{%- endblock %}
+
 {% block variables %}
 if [[ ${PV} = *9999* ]]; then
     inherit git-r3
