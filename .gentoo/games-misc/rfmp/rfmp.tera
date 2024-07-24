@@ -6,8 +6,7 @@ if [[ ${PV} = *9999* ]]; then
     EGIT_REPO_URI="https://github.com/GITHUB_REPOSITORY"
     EGIT_BRANCH="GITHUB_REF"
 else
-    SRC_URI="https://github.com/GITHUB_REPOSITORY/archive/${PV}.tar.gz -> ${P}.tar.gz"
     SRC_URI+=' '
-    SRC_URI+={%- block src_uri -%}{{ super() }}{%- endblock %}
+    SRC_URI+="https://github.com/GITHUB_REPOSITORY/archive/${PV}.tar.gz -> ${P}.tar.gz"
 fi
 {% endblock %}
