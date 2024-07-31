@@ -1,0 +1,31 @@
+name: gentoo release ebuild
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  ebuild-release:
+    name: Gentoo ebuild release
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/johnthecoolingfan/gentoo-action-image:main
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install pycargoebuild
+      shell: bash
+      run: emerge app-portage/pycargoebuild
+
+    - name: Generate ebuild
+      shell: bash
+      run: pycargoebuild --inplace ./.gentoo/games-misc/rfmp/rfmp-9999.ebuild
+        
+    - name: Release ebuild
+      uses: JohnTheCoolingFan/action-ebuild-release@master
+      with:
+        auth_token: ${{ secrets.PR_TOKEN }}
+        deploy_key: ${{ secrets.DEPLOY_KEY }}
+        overlay_repo: JohnTheCoolingFan/jtcf-ebuild-repo
