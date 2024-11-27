@@ -219,7 +219,9 @@ fn main() {
 
     // Add root dir
     //println!("Adding root dir");
-    zipwriter.add_directory(mod_name_with_version.clone(), None);
+    zipwriter
+        .add_directory(mod_name_with_version.clone())
+        .done();
 
     let path_prefix = Path::new(&mod_name_with_version);
 
@@ -235,17 +237,22 @@ fn main() {
 
         if path.is_file() {
             //println!("adding file {:?}", zipped_name);
-            zipwriter.add_file_from_fs(
-                path,
-                zipped_name.to_string(),
-                level,
-                stored.then_some(CompressionType::Stored),
-            );
+            zipwriter
+                .add_file_from_fs(path, zipped_name.to_string())
+                .compression_level(level.unwrap_or(CompressionLevel::best()))
+                .compression_type(if stored {
+                    CompressionType::Stored
+                } else {
+                    CompressionType::Deflate
+                })
+                .done();
         } else if !path.as_os_str().is_empty() {
             //println!("adding dir  {:?}", zipped_name);
             zipwriter
-                .add_directory_with_metadata_from_fs(zipped_name.to_string(), path)
-                .unwrap();
+                .add_directory(zipped_name.to_string())
+                .metadata_from_fs(&path)
+                .unwrap()
+                .done();
         }
     }
 
